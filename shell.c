@@ -3,18 +3,23 @@
 #include <string.h>
 
 int main() {
-    char buffer[513];
+    // Declare a buffer to store the user input
+    char user_input[512];
+    // Print to console and prompt user to enter a value
     printf("$ ");
-    fgets(buffer, 512, stdin);
-    while (strncmp(buffer, "exit", 4) && !feof(stdin)) {
-        
-        char* token = strtok(buffer, " \n\t|><&;");
+    fgets(user_input, sizeof(user_input), stdin);
+    // Keep asking the user to enter a value (except they enter 'exit')
+    while (strncmp(user_input, "exit", 4) && !feof(stdin)) {
+        // Split the user input into words
+        char* token = strtok(user_input, " \n\t|><&;");
         while (token != NULL) {
             printf("'%s'\n", token);
             token = strtok(NULL, " \n\t|><&;");
         }
+        // Prompt for the next user value
         printf("$ ");
-        fgets(buffer, 512, stdin);
+        fgets(user_input, sizeof(user_input), stdin);
     }
+    // Create a new line
     printf("\n");
 }
