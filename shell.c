@@ -3,7 +3,6 @@
 #include <string.h>
 
 int main() {
-
     char buffer[513];
     printf("$ ");
     fgets(buffer, 512, stdin);
@@ -17,5 +16,5 @@ int main() {
         printf("$ ");
         fgets(buffer, 512, stdin);
     }
-    printf("\n")
+    printf("\n");
 }
