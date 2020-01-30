@@ -8,7 +8,7 @@ int main() {
     // Print to console and prompt user to enter a value
     printf("$ ");
     fgets(user_input, sizeof(user_input), stdin);
-    // Keep asking the user to enter a value (except they enter 'exit')
+    // Keep asking the user to enter a value (except when they enter 'exit')
     while (strncmp(user_input, "exit", 4) && !feof(stdin)) {
         // Split the user input into words
         char* token = strtok(user_input, " \n\t|><&;");
