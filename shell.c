@@ -17,4 +17,5 @@ int main() {
         printf("$ ");
         fgets(buffer, 512, stdin);
     }
+    printf("\n")
 }
