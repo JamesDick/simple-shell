@@ -8,10 +8,10 @@ int main() {
     fgets(buffer, 512, stdin);
     while (strncmp(buffer, "exit", 4) && !feof(stdin)) {
         
-        char* token = strtok(buffer, " ");
+        char* token = strtok(buffer, " \n\t|><&;");
         while (token != NULL) {
-            printf("arg: %s\n", token);
-            token = strtok(NULL, " ");
+            printf("'%s'\n", token);
+            token = strtok(NULL, " \n\t|><&;");
         }
         printf("$ ");
         fgets(buffer, 512, stdin);
