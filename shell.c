@@ -33,6 +33,7 @@ int main() {
         if (c_pid == 0) {
             execvp(args[0], args);
             perror("Error: execvp failed!\n");
+            _exit(1);
         }
         else if (c_pid > 0){
             if((pid = wait(&status)) < 0) {
