@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h> 
+#include<sys/wait.h> 
+#include <unistd.h> 
 
 int main() {
     // Declare a buffer to store the user input
@@ -14,9 +17,28 @@ int main() {
         char* token = strtok(user_input, " \n\t|><&;");
         char* args[50];
         int argCount = 0;
+        pid_t c_pid, pid;
+        int status;
         while (token != NULL) {
-            args[argCount++] = token;
+            args[argCount] = token;
             token = strtok(NULL, " \n\t|><&;");
+            argCount++;
+        }
+        args[argCount] = NULL;
+        c_pid = fork();
+        if (c_pid == -1) {
+            perror("Error: Fork failed!\n");
+            _exit(1);
+        }
+        if (c_pid == 0) {
+            execvp(args[0], args);
+            perror("Error: execvp failed!\n");
+        }
+        else if (c_pid > 0){
+            if((pid = wait(&status)) < 0) {
+                perror("Error: Wait failed!\n");
+                _exit(1);
+            }
         }
         // Prompt for the next user value
         printf("$ ");
