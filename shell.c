@@ -14,9 +14,9 @@ void exec_cmd(char** args);
 
 int main() {
     char user_input[BUFFER_SIZE];
+    char* args[ARG_LIMIT];
     get_input(user_input);
-    while (strncmp(user_input, "exit", 4) && !feof(stdin)) {
-        char* args[ARG_LIMIT];
+    while (strncmp(user_input, "exit", 4) && !feof(stdin)) {        
         get_args(args, user_input);
         exec_cmd(args);
         get_input(user_input);
