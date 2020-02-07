@@ -16,11 +16,14 @@ int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
     get_input(user_input);
+
+    // Loop until the user enters "exit" or presses CTRL+D
     while (strncmp(user_input, "exit", 4) && !feof(stdin)) {        
         get_args(args, user_input);
         exec_cmd(args);
         get_input(user_input);
     }
+    
     printf("\n");
 }
 
