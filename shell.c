@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h> 
-#include<sys/wait.h> 
+#include <sys/wait.h> 
 #include <unistd.h>
 
 #define BUFFER_SIZE 512
@@ -11,6 +11,7 @@
 void get_input(char* user_input);
 void get_args(char** args, char* user_input);
 void exec_cmd(char** args);
+void handle_path_cmds(char** args);
 
 int main() {
     char user_input[BUFFER_SIZE];
@@ -67,6 +68,7 @@ void exec_cmd(char** args) {
         _exit(1);
     }
     if (c_pid == 0) { // child
+        handle_path_cmds(args);
         execvp(args[0], args);
         perror("");
         _exit(1);
@@ -77,4 +79,33 @@ void exec_cmd(char** args) {
             _exit(1);
         }
     }
+}
+
+void handle_path_cmds(char** args) {
+    if(strncmp(args[0], "getpath", 7) == 0) {
+        char* path = getenv("PATH");
+        printf("\n%s\n\n", path);
+    }
+    else if(strncmp(args[0], "setpath", 7) == 0 && args[1] != NULL) {
+        char new_path[BUFFER_SIZE] = "";
+        char* orig_path = getenv("PATH");
+
+        strcat(new_path, orig_path);
+        strcat(new_path, ":");
+        strcat(new_path, args[1]);
+
+        DIR* dir = opendir(args[1]);
+        if (dir) {
+            setenv("PATH", new_path, 1);
+            printf("Original path:\n%s\n\n", orig_path);
+            printf("Changed path:\n%s\n\n", getenv("PATH"));
+
+            closedir(dir);
+        }
+        else if (ENOENT == errno) {
+        perror("Directory does not exist!");
+        }
+    }
+
+    _exit(1);
 }
