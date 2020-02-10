@@ -4,6 +4,8 @@
 #include <sys/types.h> 
 #include <sys/wait.h> 
 #include <unistd.h>
+#include <dirent.h>
+#include <errno.h>
 
 #define BUFFER_SIZE 512
 #define ARG_LIMIT 50
