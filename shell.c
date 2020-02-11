@@ -86,17 +86,23 @@ void get_args(char** args, char* user_input) {
  * @param user_input The most recent command from the user
  */
 void invoke_history(History history, char* user_input) {
-    if(!strncmp(user_input, "!!", 2)) {
+    if(!strncmp(user_input, "!!", 2)) { 
+        // Invoke the most recent command from history
         strcpy(user_input, get_at(history, size(history) - 1));
     }
-    else if(!strncmp(user_input, "!-", 2)) {
+    else if(!strncmp(user_input, "!-", 2)) { 
+        // Invoke the command a specified number back from the most recent
+        // eg !-3 looks for the third most recent command
         strcpy(user_input, get_at(history, (size(history) - atoi(user_input+2))));
     }
-    else if(user_input[0] == '!') {
+    else if(user_input[0] == '!') { 
+        // Invoke the command with the specified number
+        // eg !4 invokes the fourth command in the history
         strcpy(user_input, get_at(history, atoi(user_input+1)));           
     }
-    if(!strcmp(user_input, ""))
-            printf("Command not found in history\n");
+    if(!strcmp(user_input, "")) 
+        // If no command was found by this point, print an error
+        printf("Command not found in history\n");
 }
 
 /** 
