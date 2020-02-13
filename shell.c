@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h> 
 #include <sys/wait.h> 
+#include <unistd.h> 
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
@@ -66,18 +67,18 @@ void exec_cmd(char** args) {
     int status;    
     c_pid = fork();
     if (c_pid == -1) { // fork failed
-        perror("");
+        perror("Error");
         _exit(1);
     }
     if (c_pid == 0) { // child
         handle_path_cmds(args);
         execvp(args[0], args);
-        perror("");
+        perror("Error");
         _exit(1);
     }
     else if (c_pid > 0){ // parent
         if((pid = wait(&status)) < 0) {
-            perror("");
+            perror("Error");
             _exit(1);
         }
     }
@@ -102,12 +103,12 @@ void handle_path_cmds(char** args) {
             printf("Original path:\n%s\n\n", orig_path);
             printf("Changed path:\n%s\n\n", getenv("PATH"));
 
-            closedir(dir);
+            closedir(dir); 
+            _exit(1);
         }
-        else if (ENOENT == errno) {
-        perror("Directory does not exist!");
+        else {
+            perror("Error");
+            _exit(1);
         }
     }
-
-    _exit(1);
 }
