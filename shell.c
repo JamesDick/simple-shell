@@ -11,19 +11,23 @@
 #define ARG_LIMIT 50
 
 void get_input(char* user_input);
-void get_args(char** args, char* user_input);
-void exec_cmd(char** args);
-void handle_path_cmds(char** args);
+void get_args(char** args, int* args_length, char* user_input);
+void exec_cmd(char** args, int* args_length);
+void handle_cmd(char** args, int* args_length);
+int get_new_path(char** args, int* args_length);
+int display_path(char** args, int* args_length);
+int set_new_path(char* new_path);
 
 int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
+    int* args_length; *args_length = 0;
     get_input(user_input);
 
     // Loop until the user enters "exit" or presses CTRL+D
-    while (strncmp(user_input, "exit", 4) && !feof(stdin)) {        
-        get_args(args, user_input);
-        exec_cmd(args);
+    while(strncmp(user_input, "exit", 4) && !feof(stdin)) {
+        get_args(args, args_length, user_input);
+        handle_cmd(args, args_length);
         get_input(user_input);
     }
     
@@ -46,7 +50,7 @@ void get_input(char* user_input) {
 * @param args Array in which to place the tokenized arguments
 * @param user_input Buffer holding the user input to be tokenized
 */
-void get_args(char** args, char* user_input) {
+void get_args(char** args, int* args_length, char* user_input) {
     char* token = strtok(user_input, " \n\t|><&;");
     int arg_count = 0;
     while (token) {
@@ -54,6 +58,7 @@ void get_args(char** args, char* user_input) {
         token = strtok(NULL, " \n\t|><&;");
     }
     args[arg_count] = NULL;
+    *args_length = arg_count;
 }
 
 /** 
@@ -61,7 +66,7 @@ void get_args(char** args, char* user_input) {
 *
 * @param args Array containing the arguments to be executed
 */
-void exec_cmd(char** args) {
+void exec_cmd(char** args, int* args_length) {
     pid_t c_pid, pid;
     int status;    
     c_pid = fork();
@@ -70,7 +75,6 @@ void exec_cmd(char** args) {
         _exit(1);
     }
     if (c_pid == 0) { // child
-        handle_path_cmds(args);
         execvp(args[0], args);
         perror("Error");
         _exit(1);
@@ -83,31 +87,67 @@ void exec_cmd(char** args) {
     }
 }
 
-void handle_path_cmds(char** args) {
-    if(strncmp(args[0], "getpath", 7) == 0) {
-        char* path = getenv("PATH");
-        printf("\n%s\n\n", path);
+void handle_cmd(char** args, int* args_length) {
+    int output = display_path(args, args_length);
+    if(output == 0) return;
+    output = get_new_path(args, args_length);
+    if(output == 0) return;
+
+    exec_cmd(args, args_length);
+}
+
+int get_new_path(char** args, int* args_length) {
+    if(*args_length == 1) {
+        if(strncmp(args[0], "setpath", 7) == 0) {
+            printf("To set the path a new path is needed!\n");
+            return 0;
+        }
     }
-    else if(strncmp(args[0], "setpath", 7) == 0 && args[1] != NULL) {
-        char new_path[BUFFER_SIZE] = "";
-        char* orig_path = getenv("PATH");
+    else if(*args_length == 2) {
+        if(strncmp(args[0], "setpath", 7) == 0) {
+            char new_path[BUFFER_SIZE] = "";
+            char* orig_path = getenv("PATH");
 
-        strcat(new_path, orig_path);
-        strcat(new_path, ":");
-        strcat(new_path, args[1]);
+            strcat(new_path, orig_path);
+            strcat(new_path, ":");
+            strcat(new_path, args[1]);
 
-        DIR* dir = opendir(args[1]);
-        if (dir) {
-            setenv("PATH", new_path, 1);
-            printf("Original path:\n%s\n\n", orig_path);
-            printf("Changed path:\n%s\n\n", getenv("PATH"));
+            DIR* dir = opendir(args[1]);
+            if(dir) {
+                set_new_path(new_path);
+                closedir(dir);
+            }
+            else {
+                perror("Error");
+            }
 
-            closedir(dir); 
-            _exit(1);
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+int display_path(char** args, int* args_length) {
+    if(*args_length == 1) {
+        if(strncmp(args[0], "getpath", 7) == 0) {
+            char* orig_path = getenv("PATH");
+            printf("Path: %s\n", orig_path);
+            return 0;
+        }
+    }
+}
+
+int set_new_path(char* new_path) {
+    if(new_path != NULL) {
+        int output = setenv("PATH", new_path, 1);
+        if(output == 0) {
+            printf("Path has been set succesfully!\n");
+            return 0;
         }
         else {
-            perror("Error");
-            _exit(1);
+            printf("Failed to set path!\n");
+            return -1;
         }
     }
 }
