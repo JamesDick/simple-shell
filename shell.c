@@ -77,7 +77,6 @@ void get_args(char** args, char* user_input) {
     }
     args[arg_count] = NULL;
 }
-
 /**
  * Invokes the appropriate command from history 
  * based off of the command entered by the user.
@@ -88,7 +87,7 @@ void get_args(char** args, char* user_input) {
 void invoke_history(History history, char* user_input) {
     if(!strncmp(user_input, "!!", 2)) { 
         // Invoke the most recent command from history
-        strcpy(user_input, get_at(history, size(history) - 1));
+        strcpy(user_input, get_at(history, size(history)));
     }
     else if(!strncmp(user_input, "!-", 2)) { 
         // Invoke the command a specified number back from the most recent

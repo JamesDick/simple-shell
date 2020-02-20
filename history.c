@@ -6,12 +6,12 @@
 History create_history() {
     History history;
     history = (History) malloc(sizeof(History));
-    *history = 0;
+    *history = NULL;
     return history;
 }
 
 int is_empty(History history) {
-    return *history == 0;
+    return *history == NULL;
 }
 
 int size(History history) {
@@ -32,13 +32,13 @@ History_Entry* new_entry(char* command) {
     History_Entry* new_entry;
     new_entry = (History_Entry*) malloc(sizeof(History_Entry*));
     strcpy(new_entry->command, command);
-    new_entry->next = 0;
+    new_entry->next = NULL;
     return new_entry;
 }
 
 void delete_entry(History_Entry* entry) {
     free(entry);
-    entry = 0;
+    entry = NULL;
 }
 
 void remove_head(History history) {
