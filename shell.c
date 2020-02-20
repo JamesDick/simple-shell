@@ -23,14 +23,19 @@ int main() {
     char* args[ARG_LIMIT];
     int* args_length; *args_length = 0;
     get_input(user_input);
+<<<<<<< HEAD
 
     // Loop until the user enters "exit" or presses CTRL+D
     while(strncmp(user_input, "exit", 4) && !feof(stdin)) {
         get_args(args, args_length, user_input);
         handle_cmd(args, args_length);
+=======
+    while (strncmp(user_input, "exit", 4) && !feof(stdin)) {        
+        get_args(args, user_input);
+        exec_cmd(args);
+>>>>>>> parent of f9ad6f0... Restored a comment explaining the loop's exit condition that I removed while refactoring
         get_input(user_input);
     }
-    
     printf("\n");
 }
 
