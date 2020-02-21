@@ -11,24 +11,22 @@
 #define ARG_LIMIT 50
 
 void get_input(char* user_input);
-void get_args(char** args, int* args_length, char* user_input);
-void exec_cmd(char** args, int* args_length);
-void handle_cmd(char** args, int* args_length);
-int get_new_path(char** args, int* args_length);
-int display_path(char** args, int* args_length);
+void get_args(char** args, char* user_input);
+void exec_cmd(char** args);
+void handle_cmd(char** args);
+int get_new_path(char** args);
+int display_path(char** args);
 int set_new_path(char* new_path);
 
 int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
-    int num = 0;
-    int* args_length = &num;
     get_input(user_input);
 
     // Loop until the user enters "exit" or presses CTRL+D
     while(strncmp(user_input, "exit", 4) && !feof(stdin)) {
-        get_args(args, args_length, user_input);
-        handle_cmd(args, args_length);
+        get_args(args, user_input);
+        handle_cmd(args);
         get_input(user_input);
     }
     
@@ -51,7 +49,7 @@ void get_input(char* user_input) {
 * @param args Array in which to place the tokenized arguments
 * @param user_input Buffer holding the user input to be tokenized
 */
-void get_args(char** args, int* args_length, char* user_input) {
+void get_args(char** args, char* user_input) {
     char* token = strtok(user_input, " \n\t|><&;");
     int arg_count = 0;
     while (token) {
@@ -59,7 +57,6 @@ void get_args(char** args, int* args_length, char* user_input) {
         token = strtok(NULL, " \n\t|><&;");
     }
     args[arg_count] = NULL;
-    *args_length = arg_count;
 }
 
 /** 
@@ -67,7 +64,7 @@ void get_args(char** args, int* args_length, char* user_input) {
 *
 * @param args Array containing the arguments to be executed
 */
-void exec_cmd(char** args, int* args_length) {
+void exec_cmd(char** args) {
     pid_t c_pid, pid;
     int status;    
     c_pid = fork();
@@ -88,24 +85,21 @@ void exec_cmd(char** args, int* args_length) {
     }
 }
 
-void handle_cmd(char** args, int* args_length) {
-    int output = display_path(args, args_length);
+void handle_cmd(char** args) {
+    int output = display_path(args);
     if(output == 0) return;
-    output = get_new_path(args, args_length);
+    output = get_new_path(args);
     if(output == 0) return;
 
-    exec_cmd(args, args_length);
+    exec_cmd(args);
 }
 
-int get_new_path(char** args, int* args_length) {
-    if(*args_length == 1) {
-        if(strncmp(args[0], "setpath", 7) == 0) {
+int get_new_path(char** args) {
+    if(strncmp(args[0], "setpath", 7) == 0) {
+        if(args[1] == NULL) {
             printf("To set the path a new path is needed!\n");
-            return 0;
         }
-    }
-    else if(*args_length == 2) {
-        if(strncmp(args[0], "setpath", 7) == 0) {
+        else if(args[2] == NULL) {
             char new_path[BUFFER_SIZE] = "";
             char* orig_path = getenv("PATH");
 
@@ -121,22 +115,31 @@ int get_new_path(char** args, int* args_length) {
             else {
                 perror("Error");
             }
-
-            return 0;
         }
+        else {
+            printf("Please only enter a path!\n");
+        }
+
+        return 0;
     }
 
     return -1;
 }
 
-int display_path(char** args, int* args_length) {
-    if(*args_length == 1) {
-        if(strncmp(args[0], "getpath", 7) == 0) {
+int display_path(char** args) {
+    if(strncmp(args[0], "getpath", 7) == 0) {
+        if(args[1] == NULL) {
             char* orig_path = getenv("PATH");
             printf("Path: %s\n", orig_path);
-            return 0;
         }
+        else {
+            printf("This command does not require any arguments!\n");
+        }
+        
+        return 0;
     }
+    
+    return -1;
 }
 
 int set_new_path(char* new_path) {
