@@ -8,12 +8,8 @@ typedef History_Entry** History;
 
 History create_history();
 
-int is_empty(History history);
+void add_entry(History history, char* command);
 
-int size(History history);
-
-void push(History history, char* command);
-
-char *get_at(History history, int index);
+char* get_entry(History history, char* command);
 
 void print_history(History history);

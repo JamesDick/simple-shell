@@ -12,7 +12,6 @@
 void get_input(char* user_input);
 void get_args(char** args, char* user_input);
 void exec_cmd(char** args);
-void update_history(History history, char* user_input);
 void invoke_history(History history, char* user_input);
 
 int main() {
@@ -20,11 +19,10 @@ int main() {
     char* args[ARG_LIMIT];
     History history = create_history();
     
-    get_input(user_input); // Loop until the user enters "exit" or presses CTRL+D
-    while (strncmp(user_input, "exit", 4) && !feof(stdin)) {   
-        update_history(history, user_input);        
-        if(user_input[0] == '!') // If we recognise a command is to be used from the history
-            invoke_history(history, user_input); // Replace the user input with the appropriate command from history    
+    get_input(user_input); 
+    while (strncmp(user_input, "exit", 4) && !feof(stdin)) { // Loop until the user enters "exit" or presses CTRL+D
+        invoke_history(history, user_input); 
+        add_entry(history, user_input);
         get_args(args, user_input);
         if(!strncmp(user_input, "history", 7)) // history is an internal command and should be handled separately
             print_history(history);
@@ -46,20 +44,6 @@ void get_input(char* user_input) {
     fgets(user_input, BUFFER_SIZE, stdin);
 }
 
-/**
- * Adds the user input to the command history,
- * except for when the command was an invocation of history
- * (denoted by the command starting with !)
- * 
- * @param history The data structure in which the history is stored
- * @param user_input The most recent command from the user
- */
-void update_history(History history, char* user_input) {
-    if(user_input[0] == '!' || !strcmp(user_input, ""))
-        return;
-    
-    push(history, user_input);
-}
 
 /**
 * Populates an array of arguments by tokenizing the user input
@@ -77,6 +61,7 @@ void get_args(char** args, char* user_input) {
     }
     args[arg_count] = NULL;
 }
+
 /**
  * Invokes the appropriate command from history 
  * based off of the command entered by the user.
@@ -85,23 +70,12 @@ void get_args(char** args, char* user_input) {
  * @param user_input The most recent command from the user
  */
 void invoke_history(History history, char* user_input) {
-    if(!strncmp(user_input, "!!", 2)) { 
-        // Invoke the most recent command from history
-        strcpy(user_input, get_at(history, size(history)));
+    if(user_input[0] == '!') {
+        get_entry(history, user_input);
     }
-    else if(!strncmp(user_input, "!-", 2)) { 
-        // Invoke the command a specified number back from the most recent
-        // eg !-3 looks for the third most recent command
-        strcpy(user_input, get_at(history, (size(history) - atoi(user_input+2))));
-    }
-    else if(user_input[0] == '!') { 
-        // Invoke the command with the specified number
-        // eg !4 invokes the fourth command in the history
-        strcpy(user_input, get_at(history, atoi(user_input+1)));           
-    }
-    if(!strcmp(user_input, "")) 
-        // If no command was found by this point, print an error
+    if(!strcmp(user_input, "")) {
         printf("Command not found in history\n");
+    }
 }
 
 /** 
