@@ -72,10 +72,11 @@ void get_args(char** args, char* user_input) {
 void invoke_history(History history, char* user_input) {
     if(user_input[0] == '!') {
         get_entry(history, user_input);
-    }
-    if(!strcmp(user_input, "")) {
-        printf("Command not found in history\n");
-    }
+
+        if(!strcmp(user_input, "")) {
+            printf("Command not found in history\n");
+        }   
+    }    
 }
 
 /** 

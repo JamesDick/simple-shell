@@ -29,19 +29,6 @@ int size(History history) {
     return size;
 }
 
-int entry_exists(History history, int index) {
-    if(is_empty(history)) {
-        return 0;
-    }
-
-    History_Entry* current = *history;
-    if(index < current->entry_num || index >= current->entry_num + size(history)) {
-        return 0;
-    }
-
-    return 1;
-}
-
 History_Entry* new_entry(char* command) {
     History_Entry* new_entry;
     new_entry = (History_Entry*) malloc(sizeof(History_Entry));
@@ -86,6 +73,20 @@ void add_entry(History history, char* command) {
     }  
 }
 
+int entry_exists(History history, int index) {
+    if(is_empty(history)) {
+        return 0;
+    }
+
+    History_Entry* current = *history;
+    if(index < current->entry_num || 
+        index >= current->entry_num + size(history)) {
+        return 0;
+    }
+
+    return 1;
+}
+
 char* get_at(History history, int index) {
     if(!entry_exists(history, index)) {
         return NULL;
@@ -98,8 +99,6 @@ char* get_at(History history, int index) {
     
     return current->command;
 }
-
-
 
 char* get_entry(History history, char* command) {
     if(!strncmp(command, "!!", 2)) { 
