@@ -87,14 +87,29 @@ int entry_exists(History history, int index) {
     return 1;
 }
 
+// char* get_at(History history, int index) {
+//     if(!entry_exists(history, index)) {
+//         return NULL;
+//     }
+
+//     History_Entry* current = *history;
+//     for(int i = current->entry_num; i < index; i++) {
+//         current=current->next;
+//     }
+    
+//     return current->command;
+// }
+
 char* get_at(History history, int index) {
     if(!entry_exists(history, index)) {
         return NULL;
     }
 
     History_Entry* current = *history;
-    for(int i = current->entry_num; i < index; i++) {
-        current=current->next;
+    while(current->next && current->entry_num != index) {
+        if(current->entry_num != index) {
+            current = current->next;
+        }
     }
     
     return current->command;
