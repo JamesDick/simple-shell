@@ -1,15 +1,48 @@
 typedef struct HISTORY_ENTRY {
     int entry_num;
     char command[512];
-    struct HISTORY_ENTRY *next;
 } History_Entry;
 
-typedef History_Entry** History;
+typedef struct HISTORY {
+    int front;
+    int rear;
+    int entry_count;
+    History_Entry entries[21];
+} History;
 
-History create_history();
+/**
+ * Creates and returns a structure that holds command History.
+ * Tracks the last 20 commands entered in the shell.
+ */
+History* create_history();
 
-void add_entry(History history, char* command);
+/**
+ * Adds a command as a new entry in History.
+ * 
+ * @param history The struct containing the history
+ * @param command The command to be inserted as an entry in the history
+ */
+void add_entry(History* history, char* command);
 
-char* get_entry(History history, char* command);
+/**
+ * Reads a command to identify one of three commands to search the History,
+ * then replaces the command with the value of the found History entry.
+ * If no entry is identified, the command will be an empty string.
+ * 
+ * Commands:
+ * !! - Looks for the most recent command
+ * !-x - Looks for xth most recent command
+ * !x - Looks for the command with entry number x
+ * 
+ * @param history The struct containing the history
+ * @param command The command which will be replaced with the history entry
+ */
+void get_entry(History* history, char* command);
 
-void print_history(History history);
+/**
+ * Prints out each entry in the history,
+ * with the format entry_num: command.
+ * 
+ * @param history The struct containing the history
+ */
+void print_history(History* history);

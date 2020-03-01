@@ -3,138 +3,74 @@
 #include <string.h>
 #include <stdlib.h>
 
-History create_history() {
-    History history;
-    history = (History) malloc(sizeof(History));
-    *history = NULL;
+History* create_history() {
+    /**
+     * Allocate memory for the history and
+     * initialize all counters to 0. 
+     */
+    History* history = malloc(sizeof(History));
+    history->front = 0;
+    history->rear = 0;
+    history->entry_count = 0;
     return history;
 }
 
-int is_empty(History history) {
-    return *history == NULL;
-}
-
-int size(History history) {
-    if (is_empty(history)) {
-        return 0;
-    }
-
-    History_Entry *current = *history;
-    int size = 1;
-    while(current->next) {
-        current = current->next;
-        size++;
-    }
-
-    return size;
-}
-
-History_Entry* new_entry(char* command) {
-    History_Entry* new_entry;
-    new_entry = (History_Entry*) malloc(sizeof(History_Entry));
-    strcpy(new_entry->command, command);
-    new_entry->next = NULL;
-    return new_entry;
-}
-
-void delete_entry(History_Entry* entry) {
-    free(entry);
-    entry = NULL;
-}
-
-void remove_head(History history) {
-    if(is_empty(history)) {
+void add_entry(History* history, char* command) {
+    /**
+     * Don't add nothing to the History.
+     * Non-Empty commands that are garbage are allowed. 
+     */
+    if(!strcmp("", command) || !strcmp(" ", command) || !strcmp("\n", command))
         return;
-    }
 
-    History_Entry* current = *history;
-    *history = current->next;
-    delete_entry(current);
+    /**
+     * Increment the entry counter,
+     * update the rear of the history with the new entry num
+     * and the given command.
+     */
+    history->entry_count++;
+    history->entries[history->rear].entry_num = history->entry_count;
+    strcpy(history->entries[history->rear].command, command);
+
+    /**
+     * Move the rear forward, and if it hits the end of the array, reset the rear to zero.
+     * If rear and front are equal, do the same with front.
+     */
+    history->rear = ++history->rear % 21;
+    if(history->rear == history->front) 
+        history->front = ++history->front % 21;
 }
 
-void add_entry(History history, char* command) {
-    History_Entry* entry = new_entry(command);
-    if(is_empty(history)) {
-        entry->entry_num = 1;
-        *history = entry;        
-        return;
-    }
+/**
+ * Looks for an entry in history with the given entry num,
+ * and returns it if found. Otherwise returns an empty string.
+ */
+char* get_at(History* history, int entry_num) {
+    for(int i = history->front; i != history->rear; i = ++i % 21) 
+        if(history->entries[i].entry_num == entry_num) 
+            return history->entries[i].command;       
 
-    History_Entry* current = *history;
-    while(current->next) {
-        current = current->next;
-    }
-
-    entry->entry_num = (current->entry_num) + 1;
-    current->next = entry;  
-
-    if(size(history) > 20) {
-        remove_head(history);
-    }  
+    return "";     
 }
 
-int entry_exists(History history, int index) {
-    if(is_empty(history)) {
-        return 0;
-    }
-
-    History_Entry* current = *history;
-    if(index < current->entry_num || 
-        index >= current->entry_num + size(history)) {
-        return 0;
-    }
-
-    return 1;
+void get_entry(History* history, char* command) {
+    int target = -1;
+    /**
+     * Assign the target entry number based on the provided command.
+     * Then override the command with the one from the target entry.
+     * If the entry is not found the command will be an empty string.
+     */
+    if(!strncmp(command, "!!", 2))
+        target = history->entry_count;          
+    else if(!strncmp(command, "!-", 2))
+        target = history->entry_count + 1 - atoi(command+2);      
+    else if(!strncmp(command, "!", 1))
+        target = atoi(command+1);             
+    strcpy(command, get_at(history, target));   
 }
 
-// char* get_at(History history, int index) {
-//     if(!entry_exists(history, index)) {
-//         return NULL;
-//     }
-
-//     History_Entry* current = *history;
-//     for(int i = current->entry_num; i < index; i++) {
-//         current=current->next;
-//     }
-    
-//     return current->command;
-// }
-
-char* get_at(History history, int index) {
-    if(!entry_exists(history, index)) {
-        return NULL;
-    }
-
-    History_Entry* current = *history;
-    while(current->next && current->entry_num != index) {
-        if(current->entry_num != index) {
-            current = current->next;
-        }
-    }
-    
-    return current->command;
-}
-
-char* get_entry(History history, char* command) {
-    if(!strncmp(command, "!!", 2)) { 
-        strcpy(command, get_at(history, size(history)));
-    }
-    else if(!strncmp(command, "!-", 2)) { 
-        strcpy(command, get_at(history, (size(history) - atoi(command+2))));
-    }
-    else if(!strncmp(command, "!", 1)) { 
-        strcpy(command, get_at(history, atoi(command+1)));           
-    }
-}
-
-void print_history(History history) {
-    if(is_empty(history)) {
-        return;
-    }
-
-    History_Entry* current = *history;
-    while(current) {
-        printf("%d: %s", current->entry_num, current->command);
-        current = current->next;
-    }
+void print_history(History* history) {
+    /** Start at the front and print each entry until we reach the rear. */
+    for(int i = history->front; i != history->rear; i = ++i % 21) 
+        printf("%d: %s", history->entries[i].entry_num, history->entries[i].command);    
 }

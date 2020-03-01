@@ -12,19 +12,19 @@
 void get_input(char* user_input);
 void get_args(char** args, char* user_input);
 void exec_cmd(char** args);
-void invoke_history(History history, char* user_input);
+void invoke_history(History* history, char* user_input);
 
 int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
-    History history = create_history();
+    History* history = create_history();
     
     get_input(user_input); 
-    while (strncmp(user_input, "exit", 4) && !feof(stdin)) { // Loop until the user enters "exit" or presses CTRL+D
+    while (strncmp(user_input, "exit", 4) && !feof(stdin)) { /* loop until the user enters "exit" or presses CTRL+D */
         invoke_history(history, user_input); 
         add_entry(history, user_input);
         get_args(args, user_input);
-        if(!strncmp(user_input, "history", 7)) // history is an internal command and should be handled separately
+        if(!strncmp(user_input, "history", 7)) /* history is an internal command and should be handled separately */
             print_history(history);
         else
             exec_cmd(args);
@@ -69,7 +69,7 @@ void get_args(char** args, char* user_input) {
  * @param history The data structure in which the history is stored
  * @param user_input The most recent command from the user
  */
-void invoke_history(History history, char* user_input) {
+void invoke_history(History* history, char* user_input) {
     if(user_input[0] == '!') {
         get_entry(history, user_input);
 
