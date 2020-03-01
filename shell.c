@@ -9,7 +9,7 @@
 #define BUFFER_SIZE 512
 #define ARG_LIMIT 50
 
-void get_input(char* user_input);
+char* get_input(char* user_input);
 void get_args(char** args, char* user_input);
 void exec_cmd(char** args);
 void invoke_history(History* history, char* user_input);
@@ -19,8 +19,7 @@ int main() {
     char* args[ARG_LIMIT];
     History* history = load_history();
     
-    get_input(user_input); 
-    while (strncmp(user_input, "exit", 4) && !feof(stdin)) { /* loop until the user enters "exit" or presses CTRL+D */
+    while (get_input(user_input)) { /* loop until the user enters "exit" or presses CTRL+D */
         invoke_history(history, user_input); 
         add_entry(history, user_input);
         get_args(args, user_input);
@@ -28,11 +27,8 @@ int main() {
             print_history(history);
         else
             exec_cmd(args);
-        get_input(user_input);
     }
-    
     save_history(history);
-    printf("\n");
 }
 
 /**
@@ -40,9 +36,12 @@ int main() {
 * 
 * @param user_input Buffer in which to place the user input
 */
-void get_input(char* user_input) {
+char* get_input(char* user_input) {
     printf("$ ");
-    fgets(user_input, BUFFER_SIZE, stdin);
+    char* result = fgets(user_input, BUFFER_SIZE, stdin);
+    if(strncmp(user_input, "exit", 4) == 0)
+        return 0;
+    return result;
 }
 
 
