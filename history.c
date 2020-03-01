@@ -120,6 +120,8 @@ History* load_history() {
 
 void save_history(History* history) {
     FILE* hist_file = fopen(".hist_list", "w");
+    if(!hist_file) 
+        return;
 
     for(int i = history->front; i != history->rear; i = ++i % 21) 
         fprintf(hist_file, "%d %s", history->entries[i].entry_num, history->entries[i].command); 
