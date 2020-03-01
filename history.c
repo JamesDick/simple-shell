@@ -42,6 +42,28 @@ void add_entry(History* history, char* command) {
 }
 
 /**
+ * Adds a history entry with an existing entry num.
+ * This is intended to be used when loading history from file.
+ */
+void add_existing_entry(History* history, int entry_num, char* command) {
+    /**
+     * Set the entry count of the history to be that of the given entry.
+     * If working as intended entries will be entered in ascending numerical order so this should be accurate.
+     */
+    history->entry_count = entry_num;
+    history->entries[history->rear].entry_num = entry_num;
+    strcpy(history->entries[history->rear].command, command);
+
+    /**
+     * Move the rear forward, and if it hits the end of the array, reset the rear to zero.
+     * If rear and front are equal, do the same with front.
+     */
+    history->rear = ++history->rear % 21;
+    if(history->rear == history->front) 
+        history->front = ++history->front % 21;
+}
+
+/**
  * Looks for an entry in history with the given entry num,
  * and returns it if found. Otherwise returns an empty string.
  */
@@ -73,4 +95,27 @@ void print_history(History* history) {
     /** Start at the front and print each entry until we reach the rear. */
     for(int i = history->front; i != history->rear; i = ++i % 21) 
         printf("%d: %s", history->entries[i].entry_num, history->entries[i].command);    
+}
+
+History* load_history() {
+    FILE* hist_file = fopen(".hist_list", "r");
+    History* history = create_history();
+
+    if(!hist_file) 
+        return history;    
+
+    char* entry_num;
+    char* command;
+    while(!feof(hist_file)) {
+        fscanf(hist_file, "%s[^&]%s[^&]", entry_num, command);
+        printf("loading %s: %s", entry_num, command);
+        add_existing_entry(history, atoi(entry_num), command);
+    }
+}
+
+void save_history(History* history) {
+    FILE* hist_file = fopen(".hist_list", "w");
+
+    for(int i = history->front; i != history->rear; i = ++i % 21) 
+        fprintf(hist_file, "%d&%s&", history->entries[i].entry_num, history->entries[i].command); 
 }

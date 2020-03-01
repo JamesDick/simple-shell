@@ -11,10 +11,18 @@ typedef struct HISTORY {
 } History;
 
 /**
- * Creates and returns a structure that holds command History.
- * Tracks the last 20 commands entered in the shell.
+ * Loads saved history of last 20 commands from file.
+ * If no saved history is present, a new history is created.
  */
-History* create_history();
+History* load_history();
+
+/**
+ * Saves given command history to file.
+ * This will overwrite and previous saved history.
+ * 
+ * @param history The command history to be saved.
+ */
+void save_history(History* history);
 
 /**
  * Adds a command as a new entry in History.

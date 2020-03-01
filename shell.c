@@ -17,7 +17,7 @@ void invoke_history(History* history, char* user_input);
 int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
-    History* history = create_history();
+    History* history = load_history();
     
     get_input(user_input); 
     while (strncmp(user_input, "exit", 4) && !feof(stdin)) { /* loop until the user enters "exit" or presses CTRL+D */
@@ -31,6 +31,7 @@ int main() {
         get_input(user_input);
     }
     
+    save_history(history);
     printf("\n");
 }
 
