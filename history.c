@@ -49,9 +49,10 @@ void add_existing_entry(History* history, int entry_num, char* command) {
     /**
      * Set the entry count of the history to be that of the given entry.
      * If working as intended entries will be entered in ascending numerical order so this should be accurate.
-     */
+     */    
     history->entry_count = entry_num;
     history->entries[history->rear].entry_num = entry_num;
+    strncat(command, "\n", 2);
     strcpy(history->entries[history->rear].command, command);
 
     /**
@@ -109,11 +110,12 @@ History* load_history() {
     char line[514];
     while(fgets(line, 514, hist_file)) {
         sscanf(line, "%s %[^\n]s", entry_num, command);
-        printf("entry_num: %s, command: %s\n", entry_num, command);
         add_existing_entry(history, atoi(entry_num), command);
     }
 
     fclose(hist_file);
+
+    print_history(history);
 }
 
 void save_history(History* history) {
