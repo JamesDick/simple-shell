@@ -114,8 +114,8 @@ History* load_history() {
     }
 
     fclose(hist_file);
-
     print_history(history);
+    return history;
 }
 
 void save_history(History* history) {
