@@ -98,33 +98,60 @@ void print_history(History* history) {
         printf("%d: %s", history->entries[i].entry_num, history->entries[i].command);    
 }
 
-History* load_history() {
-    FILE* hist_file = fopen(".hist_list", "r");
+History* load_history() {    
+    /**
+     * Create a new history structure.
+     * Open a connection to read from the history file.
+     */
     History* history = create_history();
+    FILE* hist_file = fopen(".hist_list", "r");
 
+    /**
+     * If the history file wasn't able to be opened,
+     * just return the fresh history we made.
+     */
     if(!hist_file) 
         return history;    
 
+    /**
+     * Create buffers to store each line of the file,
+     * and the number and command of each entry.
+     */
+    char line[515];
     char entry_num[2];
     char command[512];
-    char line[514];
-    while(fgets(line, 514, hist_file)) {
+
+    /**
+     * Scan each line of the file and add 
+     * the command to history.
+     */
+    while(fgets(line, 515, hist_file)) {
         sscanf(line, "%s %[^\n]s", entry_num, command);
         add_existing_entry(history, atoi(entry_num), command);
     }
 
+    /**
+     * Close the connection to the file and return the history.
+     */
     fclose(hist_file);
-    print_history(history);
     return history;
 }
 
 void save_history(History* history) {
+    /**
+     * Open a connection to write to the history file.
+     * If no connection was established, return.
+     */
     FILE* hist_file = fopen(".hist_list", "w");
     if(!hist_file) 
         return;
 
+    /**
+     * Write the entry num and command 
+     * from each history entry to the history file, 
+     * then close the connection.
+     */
     for(int i = history->front; i != history->rear; i = ++i % 21) 
         fprintf(hist_file, "%d %s", history->entries[i].entry_num, history->entries[i].command); 
-
     fclose(hist_file);
 }
