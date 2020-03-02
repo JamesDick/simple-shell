@@ -86,6 +86,7 @@ void exec_cmd(char** args) {
 }
 
 void handle_cmd(char** args) {
+    if(args[0] == NULL) return;
     int output = display_path(args);
     if(output == 0) return;
     output = get_new_path(args);
