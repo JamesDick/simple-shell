@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/types.h> 
 #include <sys/wait.h> 
 #include <unistd.h>
@@ -12,21 +13,23 @@
 
 void get_input(char* user_input);
 void get_args(char** args, char* user_input);
-void exec_cmd(char** args);
-void handle_cmd(char** args);
-int get_new_path(char** args);
-int display_path(char** args);
+void exec_cmd(char** args, bool stop);
+void get_new_path(char* user_input);
+void display_path();
 int set_new_path(char* new_path);
+bool handle_cmd(char** args);
 
 int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
     get_input(user_input);
 
+    chdir(getenv("HOME"));
+
     // Loop until the user enters "exit" or presses CTRL+D
     while(strncmp(user_input, "exit", 4) && !feof(stdin)) {
         get_args(args, user_input);
-        handle_cmd(args);
+        exec_cmd(args, handle_cmd(args));
         get_input(user_input);
     }
     
@@ -52,7 +55,7 @@ void get_input(char* user_input) {
 void get_args(char** args, char* user_input) {
     char* token = strtok(user_input, " \n\t|><&;");
     int arg_count = 0;
-    while (token) {
+    while(token) {
         args[arg_count++] = token;
         token = strtok(NULL, " \n\t|><&;");
     }
@@ -64,20 +67,22 @@ void get_args(char** args, char* user_input) {
 *
 * @param args Array containing the arguments to be executed
 */
-void exec_cmd(char** args) {
+void exec_cmd(char** args, bool stop) {
+    if(stop) return;
+
     pid_t c_pid, pid;
-    int status;    
+    int status;
     c_pid = fork();
-    if (c_pid == -1) { // fork failed
+    if(c_pid == -1) { // fork failed
         perror("Error");
         _exit(1);
     }
-    if (c_pid == 0) { // child
+    else if(c_pid == 0) { // child
         execvp(args[0], args);
         perror("Error");
         _exit(1);
     }
-    else if (c_pid > 0){ // parent
+    else if(c_pid > 0){ // parent
         if((pid = wait(&status)) < 0) {
             perror("Error");
             _exit(1);
@@ -85,62 +90,53 @@ void exec_cmd(char** args) {
     }
 }
 
-void handle_cmd(char** args) {
-    if(args[0] == NULL) return;
-    int output = display_path(args);
-    if(output == 0) return;
-    output = get_new_path(args);
-    if(output == 0) return;
+bool handle_cmd(char** args) {
+    if(args[0] == NULL) return true;
 
-    exec_cmd(args);
-}
-
-int get_new_path(char** args) {
-    if(strncmp(args[0], "setpath", 7) == 0) {
-        if(args[1] == NULL) {
-            printf("To set the path a new path is needed!\n");
-        }
-        else if(args[2] == NULL) {
-            char new_path[BUFFER_SIZE] = "";
-            char* orig_path = getenv("PATH");
-
-            strcat(new_path, orig_path);
-            strcat(new_path, ":");
-            strcat(new_path, args[1]);
-
-            DIR* dir = opendir(args[1]);
-            if(dir) {
-                set_new_path(new_path);
-                closedir(dir);
-            }
-            else {
-                perror("Error");
-            }
-        }
-        else {
-            printf("Please only enter a path!\n");
-        }
-
-        return 0;
-    }
-
-    return -1;
-}
-
-int display_path(char** args) {
     if(strncmp(args[0], "getpath", 7) == 0) {
         if(args[1] == NULL) {
-            char* orig_path = getenv("PATH");
-            printf("Path: %s\n", orig_path);
+            display_path();
         }
         else {
-            printf("This command does not require any arguments!\n");
+            printf("To display the path environment variable please enter the command without any arguments\n");
         }
-        
-        return 0;
+
+        return true;
     }
-    
-    return -1;
+
+    if(strncmp(args[0], "setpath", 7) == 0) {
+        if(args[1] == NULL) {
+            printf("Please enter a path to add the value to the environment variable\n");
+        }
+        else if(args[2] == NULL) {
+            get_new_path(args[1]);
+        }
+        else {
+            printf("Please only enter one path\n");
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+void get_new_path(char* user_input) {
+    char new_path[BUFFER_SIZE] = "";
+    char* orig_path = getenv("PATH");
+
+    strcat(new_path, orig_path);
+    strcat(new_path, ":");
+    strcat(new_path, user_input);
+
+    DIR* dir = opendir(user_input);
+    if(dir) {
+        set_new_path(new_path);
+        closedir(dir);
+    }
+    else {
+        perror("Error");
+    }
 }
 
 int set_new_path(char* new_path) {
@@ -155,4 +151,9 @@ int set_new_path(char* new_path) {
             return -1;
         }
     }
+}
+
+void display_path() {
+    char* path = getenv("PATH");
+    printf("Path: %s\n", path);
 }
