@@ -6,26 +6,28 @@ int main() {
     History* history = load_history();    
     chdir(getenv("HOME"));
     
-    while (get_input(user_input)) { /* loop until the user enters "exit" or presses CTRL+D */
+    while (get_input(user_input)) {
         invoke_history(history, user_input); 
         add_entry(history, user_input);
         get_args(args, user_input);
         exec_cmd(args, handle_cmd(args, history));
     }
     
+    printf("\n");
     save_history(history);
 }
 
 /**
-* Displays a prompt and gets the user input
-* 
+* Displays a prompt and gets the user input.
+* Returns NULL if the user has indicated they wish to exit.
 * @param user_input Buffer in which to place the user input
+* @return The result of the input prompt.
 */
 char* get_input(char* user_input) {
     printf("$ ");
     char* result = fgets(user_input, BUFFER_SIZE, stdin);
     if(strncmp(user_input, "exit", 4) == 0)
-        return 0;
+        result = NULL;
     return result;
 }
 

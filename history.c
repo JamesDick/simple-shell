@@ -65,8 +65,8 @@ void add_existing_entry(History* history, int entry_num, char* command) {
 }
 
 /**
- * Looks for an entry in history with the given entry num,
- * and returns it if found. Otherwise returns an empty string.
+ * Looks for an entry in history with the given entry num.
+ * If no entry was found, returns an empty string.
  */
 char* get_at(History* history, int entry_num) {
     for(int i = history->front; i != history->rear; i = ++i % 21) 
@@ -77,12 +77,12 @@ char* get_at(History* history, int entry_num) {
 }
 
 void get_entry(History* history, char* command) {
-    int target = -1;
     /**
      * Assign the target entry number based on the provided command.
      * Then override the command with the one from the target entry.
      * If the entry is not found the command will be an empty string.
      */
+    int target = -1;
     if(!strncmp(command, "!!", 2))
         target = history->entry_count;          
     else if(!strncmp(command, "!-", 2))
@@ -93,7 +93,9 @@ void get_entry(History* history, char* command) {
 }
 
 void print_history(History* history) {
-    /** Start at the front and print each entry until we reach the rear. */
+    /** 
+     * Start at the front and print each entry until we reach the rear. 
+     */
     for(int i = history->front; i != history->rear; i = ++i % 21) 
         printf("%d: %s", history->entries[i].entry_num, history->entries[i].command);    
 }
@@ -120,9 +122,9 @@ History* load_history() {
      * Create buffers to store each line of the file,
      * and the number and command of each entry.
      */
-    char line[515];
-    char entry_num[2];
-    char command[512];
+    char line[517];
+    char entry_num[4];
+    char command[514];
 
     /**
      * Scan each line of the file and add 
@@ -154,10 +156,13 @@ void save_history(History* history) {
 
     /**
      * Write the entry num and command 
-     * from each history entry to the history file, 
-     * then close the connection.
+     * from each history entry to the history file.
      */
     for(int i = history->front; i != history->rear; i = ++i % 21) 
         fprintf(hist_file, "%d %s", history->entries[i].entry_num, history->entries[i].command); 
+
+    /**
+     * Close the connection to the file.
+     */
     fclose(hist_file);
 }
