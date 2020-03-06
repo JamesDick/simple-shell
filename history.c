@@ -36,9 +36,9 @@ void add_entry(History* history, char* command) {
      * Move the rear forward, and if it hits the end of the array, reset the rear to zero.
      * If rear and front are equal, do the same with front.
      */
-    history->rear = ++history->rear % 21;
+    history->rear = ++history->rear % HISTORY_LENGTH;
     if(history->rear == history->front) 
-        history->front = ++history->front % 21;
+        history->front = ++history->front % HISTORY_LENGTH;
 }
 
 /**
@@ -59,9 +59,9 @@ void add_existing_entry(History* history, int entry_num, char* command) {
      * Move the rear forward, and if it hits the end of the array, reset the rear to zero.
      * If rear and front are equal, do the same with front.
      */
-    history->rear = ++history->rear % 21;
+    history->rear = ++history->rear % HISTORY_LENGTH;
     if(history->rear == history->front) 
-        history->front = ++history->front % 21;
+        history->front = ++history->front % HISTORY_LENGTH;
 }
 
 /**
@@ -69,7 +69,7 @@ void add_existing_entry(History* history, int entry_num, char* command) {
  * If no entry was found, returns an empty string.
  */
 char* get_at(History* history, int entry_num) {
-    for(int i = history->front; i != history->rear; i = ++i % 21) 
+    for(int i = history->front; i != history->rear; i = ++i % HISTORY_LENGTH) 
         if(history->entries[i].entry_num == entry_num) 
             return history->entries[i].command;       
 
@@ -96,7 +96,7 @@ void print_history(History* history) {
     /** 
      * Start at the front and print each entry until we reach the rear. 
      */
-    for(int i = history->front; i != history->rear; i = ++i % 21) 
+    for(int i = history->front; i != history->rear; i = ++i % HISTORY_LENGTH) 
         printf("%d: %s", history->entries[i].entry_num, history->entries[i].command);    
 }
 
@@ -158,7 +158,7 @@ void save_history(History* history) {
      * Write the entry num and command 
      * from each history entry to the history file.
      */
-    for(int i = history->front; i != history->rear; i = ++i % 21) 
+    for(int i = history->front; i != history->rear; i = ++i % HISTORY_LENGTH) 
         fprintf(hist_file, "%d %s", history->entries[i].entry_num, history->entries[i].command); 
 
     /**

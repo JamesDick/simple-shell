@@ -1,13 +1,26 @@
+/**
+ * The number of commands to be stored in the history.
+ * Value is one higher to ease the use of the circular array.
+ */
+#define HISTORY_LENGTH 21
+
+/**
+ * Represents an entry in the history.
+ * Holds an entry number and its associated command.
+ */
 typedef struct HISTORY_ENTRY {
     int entry_num;
     char command[512];
 } History_Entry;
 
+/**
+ * Represents the history of shell commands.
+ */
 typedef struct HISTORY {
     int front;
     int rear;
     int entry_count;
-    History_Entry entries[21];
+    History_Entry entries[HISTORY_LENGTH];
 } History;
 
 /**
