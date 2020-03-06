@@ -104,7 +104,10 @@ History* load_history() {
      * Open a connection to read from the history file.
      */
     History* history = create_history();
-    FILE* hist_file = fopen(".hist_list", "r");
+    char path[255];
+    strcpy(path, getenv("HOME"));
+    strcat(path, "/.hist_list");
+    FILE* hist_file = fopen(path, "r");
 
     /**
      * If the history file wasn't able to be opened,
@@ -142,7 +145,10 @@ void save_history(History* history) {
      * Open a connection to write to the history file.
      * If no connection was established, return.
      */
-    FILE* hist_file = fopen(".hist_list", "w");
+    char path[255];
+    strcpy(path, getenv("HOME"));
+    strcat(path, "/.hist_list");
+    FILE* hist_file = fopen(path, "w");
     if(!hist_file) 
         return;
 
