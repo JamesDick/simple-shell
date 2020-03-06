@@ -1,3 +1,4 @@
 .vscode
 .hist_list
 shell
+compile.sh
