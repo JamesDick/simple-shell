@@ -24,7 +24,7 @@ int main() {
 * @return The result of the input prompt.
 */
 char* get_input(char* user_input) {
-    printf("$ ");
+    printf("\033[1;92m%s\033[0m: $ ", getenv("USER"));
     char* result = fgets(user_input, BUFFER_SIZE, stdin);
     if(strncmp(user_input, "exit", 4) == 0)
         result = NULL;
