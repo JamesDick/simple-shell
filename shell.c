@@ -24,15 +24,34 @@ int main() {
 * @return The result of the input prompt.
 */
 char* get_input(char* user_input) {
-    char hostname[255];
-    gethostname(hostname, 255);
-    char directory[255];
-    getcwd(directory, 255);
-    printf("\033[1;92m%s@%s\033[0m:\033[1;34m%s>\033[0m$ ", getenv("USER"), hostname, directory);
+    display_prompt();
     char* result = fgets(user_input, BUFFER_SIZE, stdin);
     if(strncmp(user_input, "exit", 4) == 0)
         result = NULL;
     return result;
+}
+
+/**
+ * Displays the prompt for user input,
+ * in the format: username@hostname:/path/to/directory$
+ */
+void display_prompt() {
+    char username[32];
+    strcpy(username, getenv("USER"));
+
+    char hostname[255];
+    gethostname(hostname, 255);
+
+    char directory[4096];
+    getcwd(directory, 4096);
+
+    /** 
+     * \033 is an escape sequence, 
+     * [1;92m and [1;94m are colour codes, 
+     * [0m is to reset
+     */
+    printf("\033[1;92m%s@%s\033[0m:\033[1;94m%s\033[0m$ ", 
+        username, hostname, directory);
 }
 
 

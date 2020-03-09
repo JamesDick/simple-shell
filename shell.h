@@ -13,6 +13,7 @@
 #define ARG_LIMIT 50
 
 char* get_input(char* user_input);
+void display_prompt();
 void invoke_history(History* history, char* user_input);
 void get_args(char** args, char* user_input);
 void exec_cmd(char** args, bool stop);
