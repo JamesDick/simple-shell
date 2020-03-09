@@ -26,7 +26,9 @@ int main() {
 char* get_input(char* user_input) {
     char hostname[255];
     gethostname(hostname, 255);
-    printf("\033[1;92m%s@%s\033[0m: $ ", getenv("USER"), hostname);
+    char directory[255];
+    getcwd(directory, 255);
+    printf("\033[1;92m%s@%s\033[0m:\033[1;34m%s>\033[0m$ ", getenv("USER"), hostname, directory);
     char* result = fgets(user_input, BUFFER_SIZE, stdin);
     if(strncmp(user_input, "exit", 4) == 0)
         result = NULL;
