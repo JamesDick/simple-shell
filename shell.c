@@ -181,7 +181,13 @@ bool handle_cmd(char** args, History* history) {
     }
 
     if(strcmp(args[0], "history") == 0) {
-        print_history(history);
+        if(args[1] == NULL) {
+            print_history(history);
+        }
+        else {
+            printf("This command does not have any arguments");
+        }
+
         return true;
     }
 
