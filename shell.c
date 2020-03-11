@@ -119,7 +119,7 @@ void exec_cmd(char** args, bool stop) {
     }
     else if(c_pid == 0) { // child
         execvp(args[0], args);
-        perror("Error");
+        fprintf(stderr, "Command %s failed: %s\n", args[0], strerror(errno));
         _exit(1);
     }
     else if(c_pid > 0){ // parent
