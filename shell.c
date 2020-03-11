@@ -138,18 +138,10 @@ bool handle_cmd(char** args, History* history) {
             chdir(getenv("HOME"));
         }
         else if(args[2] == NULL) {
-            if(strncmp(args[1], ".", 2) == 0) {
-                return true;
-            }
-            else if(strncmp(args[1], "..", 2) == 0) {
-                set_dir_to_parent();
-            }
-            else {
-                set_dir_to_user_input(args[1]);
-            }
+            set_dir(args[1]);
         }
         else {
-            printf("Please only enter one path\n");
+            printf(TOO_MANY_ARGS "please only enter one path\n");
         }
 
         return true;
@@ -160,7 +152,7 @@ bool handle_cmd(char** args, History* history) {
             display_path();
         }
         else {
-            printf("To display the path environment variable please enter the command without any arguments\n");
+            printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
         }
 
         return true;
@@ -168,13 +160,13 @@ bool handle_cmd(char** args, History* history) {
 
     if(strcmp(args[0], "setpath") == 0) {
         if(args[1] == NULL) {
-            printf("Please enter a path to add the value to the environment variable\n");
+            printf(TOO_FEW_ARGS "please enter a path to set\n");
         }
         else if(args[2] == NULL) {
             get_new_path(args[1]);
         }
         else {
-            printf("Please only enter one path\n");
+            printf(TOO_MANY_ARGS "please only enter one path\n");
         }
 
         return true;
@@ -185,7 +177,7 @@ bool handle_cmd(char** args, History* history) {
             print_history(history);
         }
         else {
-            printf("To view the history please enter the command without any arguments\n");
+            printf(TOO_FEW_ARGS "please enter the command without any arguments\n");
         }
 
         return true;
@@ -216,7 +208,7 @@ int set_new_path(char* new_path) {
             return 0;
         }
         else {
-            printf("Failed to set path!\n");
+            perror("Error");
             return -1;
         }
     }
@@ -227,14 +219,7 @@ void display_path() {
     printf("PATH: %s\n", path);
 }
 
-void set_dir_to_parent() {
-    if(chdir(get_parent_dir()) == -1) {
-        perror("Error");
-        return;
-    }
-}
-
-void set_dir_to_user_input(char* user_input) {
+void set_dir(char* user_input) {
     char path_buffer[BUFFER_SIZE] = "";
     strcat(path_buffer, user_input);
 
@@ -268,23 +253,6 @@ char* get_last_word(char* user_input) {
     char* word_buffer_ptr = word_buffer;
     return word_buffer_ptr;
 
-}
-
-char* get_parent_dir() {
-    char* path_split[ARG_LIMIT];
-    char current_dir[BUFFER_SIZE];
-    char ready_path[BUFFER_SIZE] = "/";
-    getcwd(current_dir, BUFFER_SIZE);
-    int args_length = split_path(path_split, current_dir);
-
-    for(int i = 0; i < args_length - 1; i++) {
-        strcat(ready_path, path_split[i]);
-        if(i == args_length - 2) break;
-        strcat(ready_path, "/");
-    }
-
-    char* ready_path_ptr = ready_path;
-    return ready_path_ptr;
 }
 
 char* replacetilde(char* path) {
