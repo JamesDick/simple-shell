@@ -185,7 +185,7 @@ bool handle_cmd(char** args, History* history) {
             print_history(history);
         }
         else {
-            printf("This command does not have any arguments");
+            printf("To view the history please enter the command without any arguments\n");
         }
 
         return true;
