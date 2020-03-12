@@ -177,7 +177,7 @@ bool handle_cmd(char** args, History* history) {
             print_history(history);
         }
         else {
-            printf(TOO_FEW_ARGS "please enter the command without any arguments\n");
+            printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
         }
 
         return true;
