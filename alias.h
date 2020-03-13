@@ -1,9 +1,18 @@
+/**
+ * Entry in a list of aliases.
+ * Holds a string for the alias and the command which replaces it.
+ * Also holds a pointer to the next alias in the list.
+ */
 typedef struct ALIAS {
     char alias[512];
     char replacement[512];
     struct ALIAS* next;
 } Alias;
 
+/**
+ * Pointer to the first in a list of aliases.
+ * Pointer to null if the list is empty.
+ */
 typedef Alias** Alias_List;
 
 void add_alias(Alias_List list, char* alias, char* replacement);
