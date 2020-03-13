@@ -4,13 +4,15 @@ int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
     History* history = load_history();    
+    Alias_List alias_list = new_alias_list();
     chdir(getenv("HOME"));
     
     while (get_input(user_input)) {
-        invoke_history(history, user_input); 
+        invoke_history(history, user_input);
+        insert_aliases(alias_list, user_input);
         add_entry(history, user_input);
         get_args(args, user_input);
-        exec_cmd(args, handle_cmd(args, history));
+        exec_cmd(args, handle_cmd(args, history, alias_list));
     }
     
     printf("\n");
@@ -117,7 +119,7 @@ void exec_cmd(char** args, bool stop) {
     }
 }
 
-bool handle_cmd(char** args, History* history) {
+bool handle_cmd(char** args, History* history, Alias_List alias_list) {
     if(args[0] == NULL) return true;
 
     if(strcmp(args[0], "getpath") == 0) {
@@ -150,7 +152,44 @@ bool handle_cmd(char** args, History* history) {
         return true;
     }
 
+    if(strcmp(args[0], "alias") == 0) {
+        if(!args[1]) {
+            print_aliases(alias_list);
+        }
+        else if(args[2]) {
+            add_alias(alias_list, args[1], reconstruct_args(args, 2));
+        }
+
+        return true;
+    }
+
+    if(strcmp(args[0], "unalias") == 0) {
+        if(!args[1]) {
+            printf("unalias: too few arguments\n");
+        }
+        if(args[1] && !args[2]) {
+            remove_alias(alias_list, args[1]);
+        }
+        else {
+            printf("unalias: too many arguments\n");
+        }
+
+        return true;
+    }
+
     return false;
+}
+
+char* reconstruct_args(char** args, int i) {
+    char* buffer;
+    buffer = (char*) malloc(sizeof(BUFFER_SIZE));
+
+    while(args[i]) {
+        strcat(buffer, args[i++]);
+        strcat(buffer, " ");
+    }
+
+    return buffer;
 }
 
 void get_new_path(char* user_input) {

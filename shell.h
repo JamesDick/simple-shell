@@ -8,6 +8,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include "history.h"
+#include "alias.h"
 
 #define BUFFER_SIZE 512
 #define ARG_LIMIT 50
@@ -20,4 +21,5 @@ void exec_cmd(char** args, bool stop);
 void get_new_path(char* user_input);
 void display_path();
 int set_new_path(char* new_path);
-bool handle_cmd(char** args, History* history);
+bool handle_cmd(char** args, History* history, Alias_List alias_list);
+char* reconstruct_args(char** args, int start);
