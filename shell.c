@@ -244,7 +244,7 @@ int set_new_path(char* new_path) {
     if(new_path != NULL) {
         int output = setenv("PATH", new_path, 1);
         if(output == 0) {
-            //printf("New PATH: %s\n", getenv("PATH"));
+            printf("New PATH: %s\n", getenv("PATH"));
             return 0;
         }
         else {
