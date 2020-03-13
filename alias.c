@@ -120,3 +120,46 @@ void print_aliases(Alias_List list) {
         current = current->next;
     }
 }
+
+Alias_List load_aliases() {
+    
+    Alias_List list = new_alias_list();
+    char path[255];
+    strcpy(path, getenv("HOME"));
+    strcat(path, "/.aliases");
+    FILE* alias_file = fopen(path, "r");
+    
+    if(!alias_file) 
+        return list;    
+
+    
+    char line[1025];
+    char alias[512];
+    char replacement[512];
+
+    
+    while(fgets(line, 1025, alias_file)) {
+        sscanf(line, "%s %[^\n]s", alias, replacement);
+        add_alias(list, alias, replacement);
+    }
+    
+    fclose(alias_file);
+    return list;
+}
+
+void save_aliases(Alias_List list) {
+    char path[255];
+    strcpy(path, getenv("HOME"));
+    strcat(path, "/.aliases");
+    FILE* alias_file = fopen(path, "w");
+    if(!alias_file) 
+        return;
+
+    Alias* current = *list;
+    while(current) {
+        fprintf(alias_file, "%s %s", current->alias, current->replacement); 
+        current = current->next;
+    }
+
+    fclose(alias_file);
+}

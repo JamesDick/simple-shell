@@ -5,7 +5,7 @@ int main() {
     char* args[ARG_LIMIT];
     char* orig_path = getenv("PATH");
     History* history = load_history();    
-    Alias_List alias_list = new_alias_list();
+    Alias_List alias_list = load_aliases();
     chdir(getenv("HOME"));
     
     while (get_input(user_input)) {
@@ -19,6 +19,7 @@ int main() {
     printf("\n");
     set_new_path(orig_path);
     save_history(history);
+    save_aliases(alias_list);
 }
 
 /**
@@ -243,7 +244,7 @@ int set_new_path(char* new_path) {
     if(new_path != NULL) {
         int output = setenv("PATH", new_path, 1);
         if(output == 0) {
-            printf("New PATH: %s\n", getenv("PATH"));
+            //printf("New PATH: %s\n", getenv("PATH"));
             return 0;
         }
         else {

@@ -6,8 +6,6 @@ typedef struct ALIAS {
 
 typedef Alias** Alias_List;
 
-Alias_List new_alias_list();
-
 void add_alias(Alias_List list, char* alias, char* replacement);
 
 void remove_alias(Alias_List list, char* alias);
@@ -20,3 +18,7 @@ void remove_alias(Alias_List list, char* alias);
 void insert_aliases(Alias_List list, char* command);
 
 void print_aliases(Alias_List list);
+
+Alias_List load_aliases();
+
+void save_aliases(Alias_List list);
