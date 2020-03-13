@@ -3,6 +3,7 @@
 int main() {
     char user_input[BUFFER_SIZE];
     char* args[ARG_LIMIT];
+    char* orig_path = getenv("PATH");
     History* history = load_history();    
     Alias_List alias_list = new_alias_list();
     chdir(getenv("HOME"));
@@ -16,6 +17,7 @@ int main() {
     }
     
     printf("\n");
+    set_new_path(orig_path);
     save_history(history);
 }
 
@@ -74,6 +76,17 @@ void get_args(char** args, char* user_input) {
     args[arg_count] = NULL;
 }
 
+int split_path(char** args, char* user_input) {
+    char* token = strtok(user_input, "/");
+    int arg_count = 0;
+    while(token) {
+        args[arg_count++] = token;
+        token = strtok(NULL, "/");
+    }
+    args[arg_count] = NULL;
+    return arg_count;
+}
+
 /**
  * Invokes the appropriate command from history 
  * based off of the command entered by the user.
@@ -108,7 +121,7 @@ void exec_cmd(char** args, bool stop) {
     }
     else if(c_pid == 0) { // child
         execvp(args[0], args);
-        perror("Error");
+        fprintf(stderr, "Command %s failed: %s\n", args[0], strerror(errno));
         _exit(1);
     }
     else if(c_pid > 0){ // parent
@@ -122,12 +135,26 @@ void exec_cmd(char** args, bool stop) {
 bool handle_cmd(char** args, History* history, Alias_List alias_list) {
     if(args[0] == NULL) return true;
 
+    if(strncmp(args[0], "cd", 2) == 0) {
+        if(args[1] == NULL) {
+            chdir(getenv("HOME"));
+        }
+        else if(args[2] == NULL) {
+            set_dir(args[1]);
+        }
+        else {
+            printf(TOO_MANY_ARGS "please only enter one path\n");
+        }
+
+        return true;
+    }
+
     if(strcmp(args[0], "getpath") == 0) {
         if(args[1] == NULL) {
             display_path();
         }
         else {
-            printf("To display the path environment variable please enter the command without any arguments\n");
+            printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
         }
 
         return true;
@@ -135,20 +162,26 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
 
     if(strcmp(args[0], "setpath") == 0) {
         if(args[1] == NULL) {
-            printf("Please enter a path to add the value to the environment variable\n");
+            printf(TOO_FEW_ARGS "please enter a path to set\n");
         }
         else if(args[2] == NULL) {
             get_new_path(args[1]);
         }
         else {
-            printf("Please only enter one path\n");
+            printf(TOO_MANY_ARGS "please only enter one path\n");
         }
 
         return true;
     }
 
     if(strcmp(args[0], "history") == 0) {
-        print_history(history);
+        if(args[1] == NULL) {
+            print_history(history);
+        }
+        else {
+            printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
+        }
+
         return true;
     }
 
@@ -194,10 +227,6 @@ char* reconstruct_args(char** args, int i) {
 
 void get_new_path(char* user_input) {
     char new_path[BUFFER_SIZE] = "";
-    char* orig_path = getenv("PATH");
-
-    strcat(new_path, orig_path);
-    strcat(new_path, ":");
     strcat(new_path, user_input);
 
     DIR* dir = opendir(user_input);
@@ -214,11 +243,11 @@ int set_new_path(char* new_path) {
     if(new_path != NULL) {
         int output = setenv("PATH", new_path, 1);
         if(output == 0) {
-            printf("Path has been set succesfully!\n");
+            printf("New PATH: %s\n", getenv("PATH"));
             return 0;
         }
         else {
-            printf("Failed to set path!\n");
+            perror("Error");
             return -1;
         }
     }
@@ -226,5 +255,58 @@ int set_new_path(char* new_path) {
 
 void display_path() {
     char* path = getenv("PATH");
-    printf("Path: %s\n", path);
+    printf("PATH: %s\n", path);
+}
+
+void set_dir(char* user_input) {
+    char path_buffer[BUFFER_SIZE] = "";
+    strcat(path_buffer, user_input);
+
+    char* ready_path_ptr = path_buffer;
+
+    if(strncmp(path_buffer, "~", 1) == 0) {
+        ready_path_ptr = replacetilde(user_input);
+    }
+
+    if(chdir(ready_path_ptr) == -1) {
+        char* prefix = "cd:";
+        int errnum = errno;
+        char* error_msg = strerror(errnum);
+
+        if(errnum == 20) {
+            char* file_name = get_last_word(user_input);
+            printf("%s %s: %s\n", prefix, file_name, error_msg);
+            return;
+        }
+
+        printf("%s %s\n", prefix, error_msg);
+    }
+}
+
+char* get_last_word(char* user_input) {
+    char word_buffer[BUFFER_SIZE] = "";
+    char* path_split[ARG_LIMIT];
+    int args_length = split_path(path_split, user_input);
+    strcat(word_buffer, path_split[args_length - 1]);
+
+    char* word_buffer_ptr = word_buffer;
+    return word_buffer_ptr;
+
+}
+
+char* replacetilde(char* path) {
+    char* path_split[ARG_LIMIT];
+    int args_length = split_path(path_split, path);
+
+    char ready_path[BUFFER_SIZE] = "";
+    path_split[0] = getenv("HOME");
+
+    for(int i = 0; i < args_length; i++) {
+        strcat(ready_path, path_split[i]);
+        if(i == args_length - 1) break;
+        strcat(ready_path, "/");
+    }
+
+    char* ready_path_ptr = ready_path;
+    return ready_path_ptr;
 }

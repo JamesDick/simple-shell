@@ -1,7 +1,4 @@
 #include "history.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 History* create_history() {
     /**

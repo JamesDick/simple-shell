@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 /**
  * The number of commands to be stored in the history.
  * Value is one higher to ease the use of the circular array.
