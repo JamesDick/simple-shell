@@ -191,22 +191,18 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
             print_aliases(alias_list);
         }
         else if(args[2] == NULL) {
-            printf(TOO_FEW_ARGS "please enter alias for the command\n");
-        }
-        else if(args[3] == NULL) {
-            // doing it this way fixed the text being filled with random unicode characters
-            char* command_ptr = malloc(sizeof(char) * BUFFER_SIZE);
-            char* alias_ptr = malloc(sizeof(char) * BUFFER_SIZE);
-            strcpy(command_ptr, args[1]);
-            strcpy(alias_ptr, args[2]);
-
-            add_alias(alias_list, command_ptr, alias_ptr);
-
-            free(command_ptr);
-            free(alias_ptr);
+            printf(TOO_FEW_ARGS "please enter the command and its arguments aswell\n");
         }
         else {
-            printf(TOO_MANY_ARGS "please only enter a command and an alias for it\n");
+            // doing it this way fixed the text being filled with random unicode characters
+            char* alias_ptr = malloc(sizeof(char) * BUFFER_SIZE);
+            strcpy(alias_ptr, args[1]);
+            char* full_command_ptr = reconstruct_args(args, 2);
+
+            add_alias(alias_list, alias_ptr, full_command_ptr);
+
+            free(alias_ptr);
+            free(full_command_ptr);
         }
 
         return true;
@@ -220,7 +216,7 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
             remove_alias(alias_list, args[1]);
         }
         else {
-            printf(TOO_MANY_ARGS "please enter only one aliass to remove\n");
+            printf(TOO_MANY_ARGS "please enter only one alias to remove\n");
         }
 
         return true;
@@ -230,12 +226,15 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
 }
 
 char* reconstruct_args(char** args, int i) {
-    char* buffer;
-    buffer = (char*) malloc(sizeof(BUFFER_SIZE));
+    char* buffer = malloc(sizeof(char) * BUFFER_SIZE);
+    strcpy(buffer, args[i]);
+    strcat(buffer, " ");
+    i++;
 
-    while(args[i]) {
-        strcat(buffer, args[i++]);
+    while(args[i] != NULL) {
+        strcat(buffer, args[i]);
         strcat(buffer, " ");
+        i++;
     }
 
     return buffer;
