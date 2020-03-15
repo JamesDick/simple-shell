@@ -57,6 +57,7 @@ int alias_exists(Alias_List list, char* alias) {
     while(current) {
         if(!strcmp(current->alias, alias))
             return 1;
+        current=current->next;
     }
 
     /* If we didn't find the alias, return 0 */
