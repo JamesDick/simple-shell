@@ -270,7 +270,7 @@ void save_aliases(Alias_List list) {
      * as a new line in the file */
     Alias* current = *list;
     while(current) {        
-        fprintf(alias_file, "%s %s", current->alias, current->replacement); 
+        fprintf(alias_file, "%s %s\n", current->alias, current->replacement); 
         current = current->next;
     }
 
