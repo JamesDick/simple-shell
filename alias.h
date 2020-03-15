@@ -1,12 +1,16 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 /**
  * Entry in a list of aliases.
  * Holds a string for the alias and the command which replaces it.
  * Also holds a pointer to the next alias in the list.
  */
-typedef struct ALIAS {
+typedef struct Alias {
     char alias[512];
     char replacement[512];
-    struct ALIAS* next;
+    struct Alias* next;
 } Alias;
 
 /**

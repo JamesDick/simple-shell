@@ -1,7 +1,4 @@
 #include "alias.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 /**
  * Creates a new alias list.
@@ -9,8 +6,7 @@
  * @return An empty list of aliases
  */
 Alias_List new_alias_list() {
-    Alias_List list;
-  	list = (Alias_List) malloc(sizeof(Alias_List));
+    Alias_List list = malloc(sizeof(Alias*));
   	*list = NULL;
   	return list;
 }
@@ -57,7 +53,7 @@ int alias_exists(Alias_List list, char* alias) {
     while(current) {
         if(!strcmp(current->alias, alias))
             return 1;
-        current=current->next;
+        current= current->next;
     }
 
     /* If we didn't find the alias, return 0 */

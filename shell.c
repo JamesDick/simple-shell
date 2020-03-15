@@ -187,25 +187,40 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
     }
 
     if(strcmp(args[0], "alias") == 0) {
-        if(!args[1]) {
+        if(args[1] == NULL) {
             print_aliases(alias_list);
         }
-        else if(args[2]) {
-            add_alias(alias_list, args[1], reconstruct_args(args, 2));
+        else if(args[2] == NULL) {
+            printf(TOO_FEW_ARGS "please enter alias for the command\n");
+        }
+        else if(args[3] == NULL) {
+            // doing it this way fixed the text being filled with random unicode characters
+            char* command_ptr = malloc(sizeof(char) * BUFFER_SIZE);
+            char* alias_ptr = malloc(sizeof(char) * BUFFER_SIZE);
+            strcpy(command_ptr, args[1]);
+            strcpy(alias_ptr, args[2]);
+
+            add_alias(alias_list, command_ptr, alias_ptr);
+
+            free(command_ptr);
+            free(alias_ptr);
+        }
+        else {
+            printf(TOO_MANY_ARGS "please only enter a command and an alias for it\n");
         }
 
         return true;
     }
 
     if(strcmp(args[0], "unalias") == 0) {
-        if(!args[1]) {
-            printf("unalias: too few arguments\n");
+        if(args[1] == NULL) {
+            printf(TOO_FEW_ARGS "please enter an alias to remove\n");
         }
-        if(args[1] && !args[2]) {
+        else if(args[2] == NULL) {
             remove_alias(alias_list, args[1]);
         }
         else {
-            printf("unalias: too many arguments\n");
+            printf(TOO_MANY_ARGS "please enter only one aliass to remove\n");
         }
 
         return true;
