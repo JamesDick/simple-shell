@@ -167,7 +167,7 @@ char* insert_alias(Alias* alias, char* command) {
 void insert_aliases(Alias_List list, char* command) {
     /* If the list if empty, there's nothing to alias.
      * If this is an unalias command, it would never work if we applied the alias */
-    if(is_empty(list) || !strncmp(command, "unalias", 7))
+    if(is_empty(list) || !strncmp(command, "alias", 5) || !strncmp(command, "unalias", 7))
         return;
         
     Alias* current = *list;    
