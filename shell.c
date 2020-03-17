@@ -9,8 +9,8 @@ int main() {
     chdir(getenv("HOME"));
     
     while (get_input(user_input)) {
-        invoke_history(history, user_input);
         insert_aliases(alias_list, user_input);
+        invoke_history(history, user_input);
         add_entry(history, user_input);
         get_args(args, user_input);
         exec_cmd(args, handle_cmd(args, history, alias_list));
