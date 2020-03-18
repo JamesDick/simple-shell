@@ -23,12 +23,14 @@ void add_alias(Alias_List list, char* alias, char* replacement);
 
 void remove_alias(Alias_List list, char* alias);
 
+char* insert_alias(Alias* alias, char* command, char* user_input);
+
 /** 
  * Looks through a command and replaces instances of an alias with its replacement 
  * @param alias_list The list of aliases
  * @param command The command to be modified
  */
-void insert_aliases(Alias_List list, char* command);
+void insert_aliases(Alias_List list, char* command, char* user_input);
 
 void print_aliases(Alias_List list);
 

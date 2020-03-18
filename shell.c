@@ -1,25 +1,32 @@
 #include "shell.h"
 
 int main() {
-    char user_input[BUFFER_SIZE];
+    char* user_input = malloc(sizeof(char) * BUFFER_SIZE);
     char* args[ARG_LIMIT];
     char* orig_path = getenv("PATH");
     History* history = load_history();    
     Alias_List alias_list = load_aliases();
     chdir(getenv("HOME"));
     
-    while (get_input(user_input)) {
-        insert_aliases(alias_list, user_input);
+    while(get_input(user_input)) {
+        split_str(args, user_input, " \n\t|><&;");
+        insert_aliases(alias_list, args[0], user_input);
+        free(args[0]);
+
         invoke_history(history, user_input);
         add_entry(history, user_input);
-        get_args(args, user_input);
+
+        split_str(args, user_input, " \n\t|><&;");
         exec_cmd(args, handle_cmd(args, history, alias_list));
+        free(args[0]);
     }
     
     printf("\n");
     set_new_path(orig_path);
     save_history(history);
     save_aliases(alias_list);
+
+    free(user_input);
 }
 
 /**
@@ -61,31 +68,27 @@ void display_prompt() {
 
 
 /**
-* Populates an array of arguments by tokenizing the user input
-* with each of " \n\t|><&;" as separators
+* Populates an array of strings by tokenizing the user input
 *
-* @param args Array in which to place the tokenized arguments
+* @param array Array in which to place the tokenized strings
 * @param user_input Buffer holding the user input to be tokenized
+* @param separators Buffer holding the separators
+* @return The number of strings
 */
-void get_args(char** args, char* user_input) {
-    char* token = strtok(user_input, " \n\t|><&;");
-    int arg_count = 0;
-    while(token) {
-        args[arg_count++] = token;
-        token = strtok(NULL, " \n\t|><&;");
-    }
-    args[arg_count] = NULL;
-}
+int split_str(char** array, char* user_input, char* separators) {
+    char* token = malloc(sizeof(char) * BUFFER_SIZE);
+    strcpy(token, user_input);
+    token = strtok(token, separators);
 
-int split_path(char** args, char* user_input) {
-    char* token = strtok(user_input, "/");
-    int arg_count = 0;
+    int count = 0;
+
     while(token) {
-        args[arg_count++] = token;
-        token = strtok(NULL, "/");
+        array[count++] = token;
+        token = strtok(NULL, separators);
     }
-    args[arg_count] = NULL;
-    return arg_count;
+
+    array[count] = NULL;
+    return count;
 }
 
 /**
@@ -109,6 +112,7 @@ void invoke_history(History* history, char* user_input) {
 * Create a child process and execute the user's arguments
 *
 * @param args Array containing the arguments to be executed
+* @param stop Bool set to true if no command is to be ran or an internal command was ran
 */
 void exec_cmd(char** args, bool stop) {
     if(stop) return;
@@ -149,10 +153,9 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
 
         return true;
     }
-
-    if(strcmp(args[0], "getpath") == 0) {
+    else if(strcmp(args[0], "getpath") == 0) {
         if(args[1] == NULL) {
-            display_path();
+            printf("PATH: %s\n", getenv("PATH"));
         }
         else {
             printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
@@ -160,8 +163,7 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
 
         return true;
     }
-
-    if(strcmp(args[0], "setpath") == 0) {
+    else if(strcmp(args[0], "setpath") == 0) {
         if(args[1] == NULL) {
             printf(TOO_FEW_ARGS "please enter a path to set\n");
         }
@@ -174,8 +176,7 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
 
         return true;
     }
-
-    if(strcmp(args[0], "history") == 0) {
+    else if(strcmp(args[0], "history") == 0) {
         if(args[1] == NULL) {
             print_history(history);
         }
@@ -185,8 +186,7 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
 
         return true;
     }
-
-    if(strcmp(args[0], "alias") == 0) {
+    else if(strcmp(args[0], "alias") == 0) {
         if(args[1] == NULL) {
             print_aliases(alias_list);
         }
@@ -194,10 +194,8 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
             printf(TOO_FEW_ARGS "please enter the command and its arguments aswell\n");
         }
         else {
-            // doing it this way fixed the text being filled with random unicode characters
-            char* alias_ptr = malloc(sizeof(char) * BUFFER_SIZE);
-            strcpy(alias_ptr, args[1]);
-            char* full_command_ptr = reconstruct_args(args, 2);
+            char* alias_ptr = reconstruct_args(args, 1, 1);
+            char* full_command_ptr = reconstruct_args(args, 2, -1);
 
             add_alias(alias_list, alias_ptr, full_command_ptr);
 
@@ -207,8 +205,7 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
 
         return true;
     }
-
-    if(strcmp(args[0], "unalias") == 0) {
+    else if(strcmp(args[0], "unalias") == 0) {
         if(args[1] == NULL) {
             printf(TOO_FEW_ARGS "please enter an alias to remove\n");
         }
@@ -225,24 +222,22 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
     return false;
 }
 
-char* reconstruct_args(char** args, int i) {
+char* reconstruct_args(char** args, int start, int end) {
     char* buffer = malloc(sizeof(char) * BUFFER_SIZE);
-    strcpy(buffer, args[i]);
-    strcat(buffer, " ");
-    i++;
+    strcpy(buffer, "");
 
-    while(args[i] != NULL) {
-        strcat(buffer, args[i]);
+    while((start <= end && args[start] != NULL) || (end == -1 && args[start] != NULL)) {
+        strcat(buffer, args[start++]);
+        if(start + 1 > end || (end == -1 && args[start + 1] == NULL)) break;
         strcat(buffer, " ");
-        i++;
     }
 
     return buffer;
 }
 
 void get_new_path(char* user_input) {
-    char new_path[BUFFER_SIZE] = "";
-    strcat(new_path, user_input);
+    char new_path[BUFFER_SIZE];
+    strcpy(new_path, user_input);
 
     DIR* dir = opendir(user_input);
     if(dir) {
@@ -254,74 +249,70 @@ void get_new_path(char* user_input) {
     }
 }
 
-int set_new_path(char* new_path) {
+void set_new_path(char* new_path) {
     if(new_path != NULL) {
-        int output = setenv("PATH", new_path, 1);
-        if(output == 0) {
+        if(setenv("PATH", new_path, 1) == 0) {
             printf("New PATH: %s\n", getenv("PATH"));
-            return 0;
         }
         else {
             perror("Error");
-            return -1;
         }
     }
-}
-
-void display_path() {
-    char* path = getenv("PATH");
-    printf("PATH: %s\n", path);
+    else {
+        printf("New PATH cannot be equal to null\n");
+    }
 }
 
 void set_dir(char* user_input) {
-    char path_buffer[BUFFER_SIZE] = "";
-    strcat(path_buffer, user_input);
+    char* final_path_ptr = malloc(sizeof(char) * BUFFER_SIZE);
+    strcpy(final_path_ptr, user_input);
 
-    char* ready_path_ptr = path_buffer;
-
-    if(strncmp(path_buffer, "~", 1) == 0) {
-        ready_path_ptr = replacetilde(user_input);
+    if(final_path_ptr[0] == '~') {
+        replacetilde(&final_path_ptr);
     }
 
-    if(chdir(ready_path_ptr) == -1) {
+    if(chdir(final_path_ptr) == -1) {
         char* prefix = "cd:";
-        int errnum = errno;
-        char* error_msg = strerror(errnum);
+        char* error_msg = strerror(errno);
 
-        if(errnum == 20) {
+        if(errno == ENOTDIR) {
             char* file_name = get_last_word(user_input);
             printf("%s %s: %s\n", prefix, file_name, error_msg);
+            free(file_name);
             return;
         }
 
         printf("%s %s\n", prefix, error_msg);
     }
+    
+    free(final_path_ptr);
 }
 
 char* get_last_word(char* user_input) {
-    char word_buffer[BUFFER_SIZE] = "";
+    char* word_ptr = malloc(sizeof(char) * BUFFER_SIZE);
     char* path_split[ARG_LIMIT];
-    int args_length = split_path(path_split, user_input);
-    strcat(word_buffer, path_split[args_length - 1]);
+    int words_length = split_str(path_split, user_input, "/");
 
-    char* word_buffer_ptr = word_buffer;
-    return word_buffer_ptr;
+    strcpy(word_ptr, path_split[words_length - 1]);
+    return word_ptr;
 
 }
 
-char* replacetilde(char* path) {
+void replacetilde(char** path) {
+    char* ready_path_ptr = malloc(sizeof(char) * BUFFER_SIZE);
     char* path_split[ARG_LIMIT];
-    int args_length = split_path(path_split, path);
+    split_str(path_split, *path, "/");
 
-    char ready_path[BUFFER_SIZE] = "";
-    path_split[0] = getenv("HOME");
+    strcpy(ready_path_ptr, getenv("HOME"));
+    strcat(ready_path_ptr, "/");
 
-    for(int i = 0; i < args_length; i++) {
-        strcat(ready_path, path_split[i]);
-        if(i == args_length - 1) break;
-        strcat(ready_path, "/");
+    int i = 1;
+    while(path_split[i] != NULL) {
+        strcat(ready_path_ptr, path_split[i++]);
+        if(path_split[i] == NULL) break;
+        strcat(ready_path_ptr, "/");
     }
 
-    char* ready_path_ptr = ready_path;
-    return ready_path_ptr;
+    strcpy(*path, ready_path_ptr);
+    free(ready_path_ptr);
 }

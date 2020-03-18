@@ -135,9 +135,10 @@ void remove_alias(Alias_List list, char* alias) {
  * 
  * @param alias The alias to search for instances of
  * @param command The command to be searched
+ * @param user_input The user input to be returned if no alias was found
  * @return The command, having been altered if the alias was found
  */
-char* insert_alias(Alias* alias, char* command) {
+char* insert_alias(Alias* alias, char* command, char* user_input) {
     /* Buffer in which the command with the inserted alias will be stored */
     static char buffer[4096];
 
@@ -146,7 +147,7 @@ char* insert_alias(Alias* alias, char* command) {
 
     /* If the alias was not found within the command, return it as is */
     if(!(alias_start = strstr(command, alias->alias)))
-        return command;
+        return user_input;
 
     /* Copy the command up to the start of the alias into the buffer */
     strncpy(buffer, command, alias_start-command);
@@ -162,18 +163,19 @@ char* insert_alias(Alias* alias, char* command) {
  * Searches a command for instances of each known alias, in turn.
  * 
  * @param list The list of aliases to be applied
- * @param command The command to be modified
+ * @param command The command to be checked for an alias
+ * @param user_input The user input to be modified
  */
-void insert_aliases(Alias_List list, char* command) {
+void insert_aliases(Alias_List list, char* command, char* user_input) {
     /* If the list if empty, there's nothing to alias.
      * If this is an unalias command, it would never work if we applied the alias */
-    if(is_empty(list) || !strncmp(command, "alias", 5) || !strncmp(command, "unalias", 7))
+    if(is_empty(list) || command == NULL || !strncmp(command, "alias", 5) || !strncmp(command, "unalias", 7))
         return;
         
     Alias* current = *list;    
     while(current) {
         /* Replace the command with the one that has any potential aliases inserted */
-        strcpy(command, insert_alias(current, command));
+        strcpy(user_input, insert_alias(current, command, user_input));
         current = current->next;
     }
 }
