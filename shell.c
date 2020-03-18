@@ -228,7 +228,7 @@ char* reconstruct_args(char** args, int start, int end) {
 
     while((start <= end && args[start] != NULL) || (end == -1 && args[start] != NULL)) {
         strcat(buffer, args[start++]);
-        if(start + 1 > end || (end == -1 && args[start + 1] == NULL)) break;
+        if((end != -1 && start > end) || (end == -1 && args[start] == NULL)) break;
         strcat(buffer, " ");
     }
 
