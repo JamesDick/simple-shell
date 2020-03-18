@@ -156,6 +156,7 @@ char* insert_alias(Alias* alias, char* command, char* user_input) {
     /* Copy the replacement for the alias onto the end of the buffer, 
      * followed by the remainder of the original command */
     sprintf(buffer+(alias_start-command), "%s%s", alias->replacement, alias_start+strlen(alias->alias));
+    strcat(buffer, "\n");
     return buffer;
 }
 
