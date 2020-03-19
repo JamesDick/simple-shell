@@ -27,8 +27,7 @@ int is_empty(Alias_List list) {
  * @param replacement The command to be used in place of the alias
  */
 Alias* new_alias(char* alias, char* replacement) {
-    Alias* new_alias;
-    new_alias = (Alias*) malloc(sizeof(Alias));
+    Alias* new_alias = malloc(sizeof(Alias));
     strcpy(new_alias->alias, alias);
     strcpy(new_alias->replacement, replacement);
     new_alias->next = NULL;
@@ -124,8 +123,9 @@ void remove_alias(Alias_List list, char* alias) {
          * by making the current node point to the node after it 
          * and deleting the alias */
         if(!strcmp(current->next->alias, alias)) {
-            current->next = current->next->next;
+            Alias* next_alias = current->next->next;
             delete_alias(current->next);
+            current->next = next_alias;
             return;
         }
 
