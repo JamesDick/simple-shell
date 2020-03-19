@@ -2,6 +2,7 @@
 
 int main() {
     char* user_input = malloc(sizeof(char) * BUFFER_SIZE);
+    char* alias_cmd = malloc(sizeof(char) * BUFFER_SIZE);
     char* args[ARG_LIMIT];
     char* orig_path = getenv("PATH");
     History* history = load_history();    
@@ -9,24 +10,27 @@ int main() {
     chdir(getenv("HOME"));
     
     while(get_input(user_input)) {
+        strcpy(alias_cmd, "");
+
         split_str(args, user_input, " \n\t|><&;");
-        insert_aliases(alias_list, args[0], user_input);
+        insert_aliases(alias_list, args, user_input, alias_cmd);
         free(args[0]);
 
         invoke_history(history, user_input);
-        add_entry(history, user_input);
+        add_entry(history, user_input, alias_cmd);
 
         split_str(args, user_input, " \n\t|><&;");
         exec_cmd(args, handle_cmd(args, history, alias_list));
         free(args[0]);
     }
     
-    printf("\n");
+    if(feof(stdin)) printf("\n");
     set_new_path(orig_path);
     save_history(history);
     save_aliases(alias_list);
 
     free(user_input);
+    free(alias_cmd);
 }
 
 /**

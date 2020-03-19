@@ -47,7 +47,7 @@ void save_history(History* history);
  * @param history The struct containing the history
  * @param command The command to be inserted as an entry in the history
  */
-void add_entry(History* history, char* command);
+void add_entry(History* history, char* command, char* alias_cmd);
 
 /**
  * Reads a command to identify one of three commands to search the History,

@@ -23,17 +23,21 @@ void add_alias(Alias_List list, char* alias, char* replacement);
 
 void remove_alias(Alias_List list, char* alias);
 
-char* insert_alias(Alias* alias, char* command, char* user_input);
+char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd);
 
-/** 
- * Looks through a command and replaces instances of an alias with its replacement 
- * @param alias_list The list of aliases
- * @param command The command to be modified
+/**
+ * Looks through a command and replaces instances of an alias with its replacement
+ * @param list The list of aliases
+ * @param args The command and its arguments split into words
+ * @param user_input The raw line read from the user
+ * @param alias_cmd The alias and its arguments to be stored
  */
-void insert_aliases(Alias_List list, char* command, char* user_input);
+void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd);
 
 void print_aliases(Alias_List list);
 
 Alias_List load_aliases();
 
 void save_aliases(Alias_List list);
+
+void create_alias_cmd(char** args, char* alias_cmd);

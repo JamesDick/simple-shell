@@ -12,13 +12,19 @@ History* create_history() {
     return history;
 }
 
-void add_entry(History* history, char* command) {
+void add_entry(History* history, char* command, char* alias_cmd) {
+    char cmd[512];
     /**
      * Don't add nothing to the History.
      * Non-Empty commands that are garbage are allowed. 
      */
     if(!strcmp("", command) || !strcmp(" ", command) || !strcmp("\n", command))
         return;
+
+    if(strcmp(alias_cmd, ""))
+        strcpy(cmd, alias_cmd);
+    else
+        strcpy(cmd, command);
 
     /**
      * Increment the entry counter,
@@ -27,7 +33,7 @@ void add_entry(History* history, char* command) {
      */
     history->entry_count++;
     history->entries[history->rear].entry_num = history->entry_count;
-    strcpy(history->entries[history->rear].command, command);
+    strcpy(history->entries[history->rear].command, cmd);
 
     /**
      * Move the rear forward, and if it hits the end of the array, reset the rear to zero.

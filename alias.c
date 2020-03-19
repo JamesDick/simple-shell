@@ -68,9 +68,15 @@ int alias_exists(Alias_List list, char* alias) {
  * @param replacement The command to be used in place of the alias
  */
 void add_alias(Alias_List list, char* alias, char* replacement) {
-    /* If  the alias is already present in the list, give an error */
+    /** If the alias is already present in the list, give an error
+     *  If the alias is one of the alias commands, give an error
+     */
     if(alias_exists(list, alias)) {
         printf("alias: %s: alias already exists\n(to replace this, first try \"unalias %s\")\n", alias, alias);
+        return;
+    }
+    else if(!strncmp(alias, "alias", 5) || !strncmp(alias, "unalias", 7)) {
+        printf("This name for an alias is not allowed!\n");
         return;
     }
 
@@ -99,6 +105,7 @@ void delete_alias(Alias* alias) {
 void remove_alias(Alias_List list, char* alias) {
     /* If the list is empty, there is nothing to remove */
     if(is_empty(list)) {
+        printf("List is empty no aliases to remove!\n");
         return;
     }
 
@@ -134,11 +141,12 @@ void remove_alias(Alias_List list, char* alias) {
  * and swaps out the alias with its replacement if found.
  * 
  * @param alias The alias to search for instances of
- * @param command The command to be searched
+ * @param args The command and its arguments split into words
  * @param user_input The user input to be returned if no alias was found
+ * @param alias_cmd The alias and its arguments to be stored
  * @return The command, having been altered if the alias was found
  */
-char* insert_alias(Alias* alias, char* command, char* user_input) {
+char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd) {
     /* Buffer in which the command with the inserted alias will be stored */
     static char buffer[4096];
 
@@ -156,27 +164,51 @@ char* insert_alias(Alias* alias, char* command, char* user_input) {
     /* Copy the replacement for the alias onto the end of the buffer, 
      * followed by the remainder of the original command */
     sprintf(buffer+(alias_start-command), "%s%s", alias->replacement, alias_start+strlen(alias->alias));
+
+    strcpy(alias_cmd, alias->alias);
+    strcat(alias_cmd, " ");
+
+    create_alias_cmd(args, alias_cmd);
+
     strcat(buffer, "\n");
+    strcat(alias_cmd, "\n");
     return buffer;
+}
+
+void create_alias_cmd(char** args, char* alias_cmd) {
+    int i = 1;
+    if(args[i] != NULL) {
+        strcat(buffer, " ");
+    }
+
+    while(args[i] != NULL){
+        strcat(buffer, args[i]);
+        strcat(alias_cmd, args[i]);
+        if(args[i + 1] == NULL) break;
+        strcat(buffer, " ");
+        strcat(alias_cmd, " ");
+        i++;
+    }
 }
 
 /**
  * Searches a command for instances of each known alias, in turn.
  * 
  * @param list The list of aliases to be applied
- * @param command The command to be checked for an alias
+ * @param args The command and its arguments split into words
  * @param user_input The user input to be modified
+ * @param alias_cmd The alias and its arguments to be stored
  */
-void insert_aliases(Alias_List list, char* command, char* user_input) {
+void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd) {
     /* If the list if empty, there's nothing to alias.
      * If this is an unalias command, it would never work if we applied the alias */
-    if(is_empty(list) || command == NULL || !strncmp(command, "alias", 5) || !strncmp(command, "unalias", 7))
+    if(is_empty(list) || args[0] == NULL || !strncmp(args[0], "alias", 5) || !strncmp(args[0], "unalias", 7))
         return;
         
     Alias* current = *list;    
     while(current) {
         /* Replace the command with the one that has any potential aliases inserted */
-        strcpy(user_input, insert_alias(current, command, user_input));
+        strcpy(user_input, insert_alias(current, args, user_input, alias_cmd));
         current = current->next;
     }
 }
