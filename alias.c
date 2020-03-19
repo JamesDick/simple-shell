@@ -154,28 +154,20 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd)
     char* alias_start;
 
     /* If the alias was not found within the command, return it as is */
-    if(!(alias_start = strstr(command, alias->alias)))
+    if(!(alias_start = strstr(args[0], alias->alias)))
         return user_input;
 
     /* Copy the command up to the start of the alias into the buffer */
-    strncpy(buffer, command, alias_start-command);
-    buffer[alias_start-command] = '\0';
+    strncpy(buffer, args[0], alias_start-args[0]);
+    buffer[alias_start-args[0]] = '\0';
 
     /* Copy the replacement for the alias onto the end of the buffer, 
      * followed by the remainder of the original command */
-    sprintf(buffer+(alias_start-command), "%s%s", alias->replacement, alias_start+strlen(alias->alias));
+    sprintf(buffer+(alias_start-args[0]), "%s%s", alias->replacement, alias_start+strlen(alias->alias));
 
     strcpy(alias_cmd, alias->alias);
     strcat(alias_cmd, " ");
 
-    create_alias_cmd(args, alias_cmd);
-
-    strcat(buffer, "\n");
-    strcat(alias_cmd, "\n");
-    return buffer;
-}
-
-void create_alias_cmd(char** args, char* alias_cmd) {
     int i = 1;
     if(args[i] != NULL) {
         strcat(buffer, " ");
@@ -189,6 +181,10 @@ void create_alias_cmd(char** args, char* alias_cmd) {
         strcat(alias_cmd, " ");
         i++;
     }
+
+    strcat(buffer, "\n");
+    strcat(alias_cmd, "\n");
+    return buffer;
 }
 
 /**

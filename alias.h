@@ -39,5 +39,3 @@ void print_aliases(Alias_List list);
 Alias_List load_aliases();
 
 void save_aliases(Alias_List list);
-
-void create_alias_cmd(char** args, char* alias_cmd);

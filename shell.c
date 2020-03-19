@@ -17,7 +17,11 @@ int main() {
         free(args[0]);
 
         invoke_history(history, user_input);
+
+        split_str(args, user_input, " \n\t|><&;");
+        insert_aliases(alias_list, args, user_input, alias_cmd);
         add_entry(history, user_input, alias_cmd);
+        free(args[0]);
 
         split_str(args, user_input, " \n\t|><&;");
         exec_cmd(args, handle_cmd(args, history, alias_list));
