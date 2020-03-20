@@ -147,24 +147,23 @@ void remove_alias(Alias_List list, char* alias) {
  * @return The command, having been altered if the alias was found
  */
 char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd) {
+    /* Pointer which points to the command */
+    char* command = args[0];
+
     /* Buffer in which the command with the inserted alias will be stored */
     static char buffer[4096];
 
-    /* A pointer to the start of the alias within the command */
-    char* alias_start;
-
-    /* If the alias was not found within the command, return it as is */
-    if(!(alias_start = strstr(args[0], alias->alias)))
+    /* Check if the user has entered and alias and replace the alias with the actual command, otherwise return the user input unchanged */
+    if(!strcmp(command, alias->alias)) {
+        strcpy(buffer, alias->replacement);
+    }
+    else {
         return user_input;
+    }
 
-    /* Copy the command up to the start of the alias into the buffer */
-    strncpy(buffer, args[0], alias_start-args[0]);
-    buffer[alias_start-args[0]] = '\0';
-
-    /* Copy the replacement for the alias onto the end of the buffer, 
-     * followed by the remainder of the original command */
-    sprintf(buffer+(alias_start-args[0]), "%s%s", alias->replacement, alias_start+strlen(alias->alias));
-
+    /* Concatenate the user arguments to the user input
+     * Create a string which stores the alias and its arguments for the history to show the alias used rather than the actual command
+     */
     strcpy(alias_cmd, alias->alias);
     strcat(alias_cmd, " ");
 
@@ -182,6 +181,7 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd)
         i++;
     }
 
+    /* Add a new line at the end so that history is printed properly */
     strcat(buffer, "\n");
     strcat(alias_cmd, "\n");
     return buffer;
