@@ -108,12 +108,14 @@ int split_str(char** array, char* user_input, char* separators) {
  */
 void invoke_history(History* history, char* user_input) {
     if(user_input[0] == '!') {
-        get_entry(history, user_input);
+        char* error_msg = get_entry(history, user_input);
 
         if(!strcmp(user_input, "")) {
-            printf("Command not found in history\n");
-        }   
-    }    
+            printf(error_msg);
+        }
+
+        free(error_msg);
+    }
 }
 
 /** 

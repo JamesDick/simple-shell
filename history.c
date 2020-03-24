@@ -79,20 +79,116 @@ char* get_at(History* history, int entry_num) {
     return "";     
 }
 
-void get_entry(History* history, char* command) {
+char* get_entry(History* history, char* command) {
+    char* error_msg = malloc(sizeof(char) * 512);
+    strcpy(error_msg, "Unknown error\n");
     /**
      * Assign the target entry number based on the provided command.
      * Then override the command with the one from the target entry.
      * If the entry is not found the command will be an empty string.
      */
     int target = -1;
-    if(!strncmp(command, "!!", 2))
-        target = history->entry_count;          
-    else if(!strncmp(command, "!-", 2))
-        target = history->entry_count + 1 - atoi(command+2);      
-    else if(!strncmp(command, "!", 1))
-        target = atoi(command+1);             
-    strcpy(command, get_at(history, target));   
+    if(!strcmp(command, "!\n")) {
+        strcpy(error_msg, "Please enter a number after '!'\n");
+    }
+    else if(!strncmp(command, "!!", 2)) {
+        target = history->entry_count;
+    }     
+    else if(!strncmp(command, "!-", 2)) {
+        if(set_error_msg(command, error_msg, "negative"))
+            return error_msg;
+        target = history->entry_count + 1 - atoi(command+2);
+    }
+    else if(!strncmp(command, "!", 1)) {
+        if(set_error_msg(command, error_msg, "positive"))
+            return error_msg;
+        target = atoi(command+1);
+    }
+
+    if(history->entries[0].entry_num == 0)
+    {
+        strcpy(error_msg, "History is empty\n");
+    }
+
+    strcpy(command, get_at(history, target));
+    return error_msg;
+}
+
+bool set_error_msg(char* command, char* error_msg, char* invoke_type) {
+    char convert_to_number[512];
+    char* trim_zeros = malloc(sizeof(char) * 512);
+    strcpy(trim_zeros, "");
+
+    bool not_numbers = has_letter(command, invoke_type, trim_zeros);
+
+    if(!strcmp(invoke_type, "positive"))
+        snprintf(convert_to_number, sizeof(convert_to_number), "%d", atoi(command+1));
+    else
+        snprintf(convert_to_number, sizeof(convert_to_number), "%d", atoi(command+2));
+    
+    strcat(convert_to_number, "\n");
+
+    if(not_numbers == true) {
+        strcpy(error_msg, "Invocations can only be numbers\n");
+        strcpy(command, "");
+        free(trim_zeros);
+        return true;
+    }
+    else if(not_numbers == false && strcmp(convert_to_number, trim_zeros)) {
+        strcpy(error_msg, "Number too large please enter a smaller number\n");
+    }
+    else if(not_numbers == false) {
+        if(!strcmp(invoke_type, "positive"))
+            strcpy(error_msg, "Positive invocation failed: out of range\n");
+        else
+            strcpy(error_msg, "Negative invocation failed: out of range\n");
+    }
+    if(!strcmp(convert_to_number, "0\n")) {
+        strcpy(error_msg, "Please enter a number bigger than zero\n");
+    }
+
+    free(trim_zeros);
+    return false;
+}
+
+bool has_letter(char* input, char* invoke_type, char* trim_zeros) {
+    char* control = malloc(sizeof(char) * 512);
+    bool not_numbers = false;
+    bool stop = false;
+    int trim = 0;
+
+    if(!strcmp(invoke_type, "negative"))
+        strcpy(control, input+2);
+    else if(!strcmp(invoke_type, "positive"))
+        strcpy(control, input+1);
+    else
+        return not_numbers;
+
+    for(int i = 0; i < strlen(control) - 1; i++) {
+        char first_char[512];
+        char* control_ptr = control+i;
+        snprintf(first_char, sizeof(first_char), "%c", control_ptr[0]);
+        int target = atoi(first_char);
+
+        if(strcmp(first_char, "0")) {
+            stop = true;
+        }
+
+        if(stop == false) {
+            trim++;
+        }
+
+        if(target == 0 && strcmp(first_char, "0"))
+            not_numbers = true;
+    }
+
+    if(!strcmp(invoke_type, "negative"))
+        strcpy(trim_zeros, input+trim+2);
+    else if(!strcmp(invoke_type, "positive"))
+        strcpy(trim_zeros, input+trim+1);
+
+    free(control);
+    return not_numbers;
 }
 
 void print_history(History* history) {

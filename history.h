@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 /**
  * The number of commands to be stored in the history.
@@ -61,8 +62,13 @@ void add_entry(History* history, char* command, char* alias_cmd);
  * 
  * @param history The struct containing the history
  * @param command The command which will be replaced with the history entry
+ * @return The error message
  */
-void get_entry(History* history, char* command);
+char* get_entry(History* history, char* command);
+
+bool set_error_msg(char* command, char* error_msg, char* invoke_type);
+
+bool has_letter(char* input, char* invoke_type, char* trim_zeros);
 
 /**
  * Prints out each entry in the history,
