@@ -5,6 +5,7 @@ int main() {
     char* alias_cmd = malloc(sizeof(char) * BUFFER_SIZE);
     char* args[ARG_LIMIT];
     char* orig_path = getenv("PATH");
+
     History* history = load_history();    
     Alias_List alias_list = load_aliases();
     chdir(getenv("HOME"));
@@ -86,10 +87,13 @@ void display_prompt() {
 int split_str(char** array, char* user_input, char* separators) {
     char* token = malloc(sizeof(char) * BUFFER_SIZE);
     strcpy(token, user_input);
-    token = strtok(token, separators);
+    strtok(token, separators);
+
+    int size = strlen(token);
+    if(token[size - 1] == '\n') token[size - 1] = 0;
+    if(!strcmp(token, "")) token = NULL;
 
     int count = 0;
-
     while(token) {
         array[count++] = token;
         token = strtok(NULL, separators);
@@ -129,6 +133,7 @@ void exec_cmd(char** args, bool stop) {
 
     pid_t c_pid, pid;
     int status;
+
     c_pid = fork();
     if(c_pid == -1) { // fork failed
         perror("Error");
@@ -136,7 +141,7 @@ void exec_cmd(char** args, bool stop) {
     }
     else if(c_pid == 0) { // child
         execvp(args[0], args);
-        fprintf(stderr, "Command %s failed: %s\n", args[0], strerror(errno));
+        fprintf(stderr, "Command [%s] failed: %s\n", args[0], strerror(errno));
         _exit(1);
     }
     else if(c_pid > 0){ // parent
@@ -147,6 +152,14 @@ void exec_cmd(char** args, bool stop) {
     }
 }
 
+/**
+* Handle internal commands
+*
+* @param args Array containing the arguments to be executed
+* @param history Pointer to the history structure
+* @param alias_list Pointer to the alias structure
+* @return Bool value to indicate whether the command should execute externally
+*/
 bool handle_cmd(char** args, History* history, Alias_List alias_list) {
     if(args[0] == NULL) return true;
 
@@ -232,6 +245,14 @@ bool handle_cmd(char** args, History* history, Alias_List alias_list) {
     return false;
 }
 
+/**
+* Make a copy of the specified arguments
+*
+* @param args Array containing the arguments to be executed
+* @param start Integer which indicates the start point of the array
+* @param end Integer which indicates the end point of the array
+* @return Buffer containing the arguments split by a space character
+*/
 char* reconstruct_args(char** args, int start, int end) {
     char* buffer = malloc(sizeof(char) * BUFFER_SIZE);
     strcpy(buffer, "");
@@ -245,6 +266,11 @@ char* reconstruct_args(char** args, int start, int end) {
     return buffer;
 }
 
+/**
+* Check if the path is a valid directory
+*
+* @param user_input String containing the user entered path
+*/
 void get_new_path(char* user_input) {
     char new_path[BUFFER_SIZE];
     strcpy(new_path, user_input);
@@ -259,6 +285,11 @@ void get_new_path(char* user_input) {
     }
 }
 
+/**
+* Sets the specified path to the PATH environment variable
+*
+* @param new_path String containing the new path
+*/
 void set_new_path(char* new_path) {
     if(new_path != NULL) {
         if(setenv("PATH", new_path, 1) == 0) {
@@ -273,6 +304,11 @@ void set_new_path(char* new_path) {
     }
 }
 
+/**
+* Sets the user entered directory
+*
+* @param user_input String containing the user entered directory
+*/
 void set_dir(char* user_input) {
     char* final_path_ptr = malloc(sizeof(char) * BUFFER_SIZE);
     strcpy(final_path_ptr, user_input);
@@ -298,6 +334,12 @@ void set_dir(char* user_input) {
     free(final_path_ptr);
 }
 
+/**
+* Gets the last word of the user entered directory
+*
+* @param user_input String containing the user entered directory
+* @return The last word
+*/
 char* get_last_word(char* user_input) {
     char* word_ptr = malloc(sizeof(char) * BUFFER_SIZE);
     char* path_split[ARG_LIMIT];
@@ -308,6 +350,11 @@ char* get_last_word(char* user_input) {
 
 }
 
+/**
+* Replaces the '~' character with the HOME directory of the user
+*
+* @param path String containing the user entered directory
+*/
 void replacetilde(char** path) {
     char* ready_path_ptr = malloc(sizeof(char) * BUFFER_SIZE);
     char* path_split[ARG_LIMIT];

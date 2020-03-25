@@ -153,7 +153,7 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd)
     /* Buffer in which the command with the inserted alias will be stored */
     static char buffer[4096];
 
-    /* Check if the user has entered and alias and replace the alias with the actual command, otherwise return the user input unchanged */
+    /* Check if the user has entered an alias and replace the alias with the actual command, otherwise return the user input unchanged */
     if(!strcmp(command, alias->alias)) {
         strcpy(buffer, alias->replacement);
     }
@@ -165,11 +165,11 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd)
      * Create a string which stores the alias and its arguments for the history to show the alias used rather than the actual command
      */
     strcpy(alias_cmd, alias->alias);
-    strcat(alias_cmd, " ");
 
     int i = 1;
     if(args[i] != NULL) {
         strcat(buffer, " ");
+        strcat(alias_cmd, " ");
     }
 
     while(args[i] != NULL){
