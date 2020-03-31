@@ -153,6 +153,111 @@ void exec_cmd(char** args, bool stop) {
 }
 
 /**
+ * Function dedicated to the 'cd' internal command
+ * 
+ * @param args Array containing the arguments
+ */
+void changedir_cmd(char** args) {
+    if(args[1] == NULL) {
+        chdir(getenv("HOME"));
+    }
+    else if(args[2] == NULL) {
+        set_dir(args[1]);
+    }
+    else {
+        printf(TOO_MANY_ARGS "please only enter one path\n");
+    }
+}
+
+/**
+ * Function dedicated to the 'getpath' internal command
+ * 
+ * @param args Array containing the arguments
+ */
+void getpath_cmd(char** args) {
+    if(args[1] == NULL) {
+        printf("PATH: %s\n", getenv("PATH"));
+    }
+    else {
+        printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
+    }
+}
+
+/**
+ * Function dedicated to the 'setpath' internal command
+ * 
+ * @param args Array containing the arguments
+ */
+void setpath_cmd(char** args) {
+    if(args[1] == NULL) {
+        printf(TOO_FEW_ARGS "please enter a path to set\n");
+    }
+    else if(args[2] == NULL) {
+        get_new_path(args[1]);
+    }
+    else {
+        printf(TOO_MANY_ARGS "please only enter one path\n");
+    }
+}
+
+/**
+ * Function dedicated to the 'history' internal command
+ * 
+ * @param args Array containing the arguments
+ * @param history Pointer to the history structure
+ */
+void history_cmd(char** args, History* history) {
+    if(args[1] == NULL) {
+        print_history(history);
+    }
+    else {
+        printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
+    }
+}
+
+/**
+ * Function dedicated to the 'alias' internal command
+ * 
+ * @param args Array containing the arguments to be executed
+ * @param alias_list Pointer to the alias structure
+ */
+void alias_cmd(char** args, Alias_List alias_list) {
+    if(args[1] == NULL) {
+        print_aliases(alias_list);
+    }
+    else if(args[2] == NULL) {
+        printf(TOO_FEW_ARGS "please enter the command and its arguments aswell\n");
+    }
+    else {
+        char* alias_ptr = reconstruct_args(args, 1, 1);
+        char* full_command_ptr = reconstruct_args(args, 2, -1);
+
+        add_alias(alias_list, alias_ptr, full_command_ptr);
+
+        free(alias_ptr);
+        free(full_command_ptr);
+    }
+}
+
+/**
+ * Function dedicated to the 'unalias' internal command
+ * 
+ * @param args Array containing the arguments to be executed
+ * @param alias_list Pointer to the alias structure
+ */
+void unalias_cmd(char** args, Alias_List alias_list) {
+    if(args[1] == NULL) {
+        printf(TOO_FEW_ARGS "please enter an alias to remove\n");
+    }
+    else if(args[2] == NULL) {
+        remove_alias(alias_list, args[1]);
+    }
+    else {
+        printf(TOO_MANY_ARGS "please enter only one alias to remove\n");
+    }
+}
+
+/**
 * Handle internal commands
 *
 * @param args Array containing the arguments to be executed
@@ -163,82 +268,28 @@ void exec_cmd(char** args, bool stop) {
 bool handle_cmd(char** args, History* history, Alias_List alias_list) {
     if(args[0] == NULL) return true;
 
-    if(strncmp(args[0], "cd", 2) == 0) {
-        if(args[1] == NULL) {
-            chdir(getenv("HOME"));
-        }
-        else if(args[2] == NULL) {
-            set_dir(args[1]);
-        }
-        else {
-            printf(TOO_MANY_ARGS "please only enter one path\n");
-        }
-
+    if(strcmp(args[0], "cd") == 0) {
+        changedir_cmd(args);
         return true;
     }
     else if(strcmp(args[0], "getpath") == 0) {
-        if(args[1] == NULL) {
-            printf("PATH: %s\n", getenv("PATH"));
-        }
-        else {
-            printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
-        }
-
+        getpath_cmd(args);
         return true;
     }
     else if(strcmp(args[0], "setpath") == 0) {
-        if(args[1] == NULL) {
-            printf(TOO_FEW_ARGS "please enter a path to set\n");
-        }
-        else if(args[2] == NULL) {
-            get_new_path(args[1]);
-        }
-        else {
-            printf(TOO_MANY_ARGS "please only enter one path\n");
-        }
-
+        setpath_cmd(args);
         return true;
     }
     else if(strcmp(args[0], "history") == 0) {
-        if(args[1] == NULL) {
-            print_history(history);
-        }
-        else {
-            printf(TOO_MANY_ARGS "please enter the command without any arguments\n");
-        }
-
+        history_cmd(args, history);
         return true;
     }
     else if(strcmp(args[0], "alias") == 0) {
-        if(args[1] == NULL) {
-            print_aliases(alias_list);
-        }
-        else if(args[2] == NULL) {
-            printf(TOO_FEW_ARGS "please enter the command and its arguments aswell\n");
-        }
-        else {
-            char* alias_ptr = reconstruct_args(args, 1, 1);
-            char* full_command_ptr = reconstruct_args(args, 2, -1);
-
-            add_alias(alias_list, alias_ptr, full_command_ptr);
-
-            free(alias_ptr);
-            free(full_command_ptr);
-        }
-
+        alias_cmd(args, alias_list);
         return true;
     }
     else if(strcmp(args[0], "unalias") == 0) {
-        if(args[1] == NULL) {
-            printf(TOO_FEW_ARGS "please enter an alias to remove\n");
-        }
-        else if(args[2] == NULL) {
-            remove_alias(alias_list, args[1]);
-        }
-        else {
-            printf(TOO_MANY_ARGS "please enter only one alias to remove\n");
-        }
-
+        unalias_cmd(args, alias_list);
         return true;
     }
 
@@ -347,7 +398,6 @@ char* get_last_word(char* user_input) {
 
     strcpy(word_ptr, path_split[words_length - 1]);
     return word_ptr;
-
 }
 
 /**
