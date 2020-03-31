@@ -146,15 +146,13 @@ void remove_alias(Alias_List list, char* alias) {
  * @param alias_cmd The alias and its arguments to be stored
  * @return The command, having been altered if the alias was found
  */
-char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd) {
-    /* Pointer which points to the command */
-    char* command = args[0];
-
+char* insert_alias(Alias* alias, char** args, char* user_input, char* command, char* alias_cmd) {
     /* Buffer in which the command with the inserted alias will be stored */
     static char buffer[4096];
 
     /* Check if the user has entered an alias and replace the alias with the actual command, otherwise return the user input unchanged */
     if(!strcmp(command, alias->alias)) {
+        strcpy(command, alias->replacement);
         strcpy(buffer, alias->replacement);
     }
     else {
@@ -195,16 +193,55 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* alias_cmd)
  * @param user_input The user input to be modified
  * @param alias_cmd The alias and its arguments to be stored
  */
-void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd) {
+void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd, bool quiet) {
     /* If the list if empty, there's nothing to alias.
      * If this is an unalias command, it would never work if we applied the alias */
     if(is_empty(list) || args[0] == NULL || !strncmp(args[0], "alias", 5) || !strncmp(args[0], "unalias", 7))
         return;
         
+    char* command = malloc(sizeof(char) * 512);
+    char* command_before = malloc(sizeof(char) * 512);
+    strcpy(command, args[0]);
+
     Alias* current = *list;    
     while(current) {
+        strcpy(command_before, command);
         /* Replace the command with the one that has any potential aliases inserted */
-        strcpy(user_input, insert_alias(current, args, user_input, alias_cmd));
+        strcpy(user_input, insert_alias(current, args, user_input, command, alias_cmd));
+
+        if(strcmp(command_before, command)) {
+            if(current->used == true) {
+                if(quiet == true)
+                    printf("Cycle found and resolved!\n");
+
+                strcpy(user_input, "");
+                strcpy(alias_cmd, "");
+                break;
+            }
+
+            current->used = true;
+            current = *list;
+            continue;
+        }
+
+        current = current->next;
+    }
+
+    reset_aliases(list);
+    free(command);
+    free(command_before);
+}
+
+/**
+* Resets the bool value 'used' back to false
+*
+* @param list The list of aliases
+*/
+void reset_aliases(Alias_List list) {
+    Alias* current = *list;
+
+    while(current) {
+        current->used = 0;
         current = current->next;
     }
 }

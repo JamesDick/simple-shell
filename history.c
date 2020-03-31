@@ -92,29 +92,27 @@ char* get_entry(History* history, char* command) {
         strcpy(error_msg, "Please enter a number after '!'\n");
     }
     else if(!strncmp(command, "!!", 2)) {
+        if(history->entries[0].entry_num == 0)
+            strcpy(error_msg, "History is empty\n");
+        
         target = history->entry_count;
     }     
     else if(!strncmp(command, "!-", 2)) {
-        if(set_error_msg(command, error_msg, "negative"))
+        if(set_error_msg(history, command, error_msg, "negative"))
             return error_msg;
         target = history->entry_count + 1 - atoi(command+2);
     }
     else if(!strncmp(command, "!", 1)) {
-        if(set_error_msg(command, error_msg, "positive"))
+        if(set_error_msg(history, command, error_msg, "positive"))
             return error_msg;
         target = atoi(command+1);
-    }
-
-    if(history->entries[0].entry_num == 0)
-    {
-        strcpy(error_msg, "History is empty\n");
     }
 
     strcpy(command, get_at(history, target));
     return error_msg;
 }
 
-bool set_error_msg(char* command, char* error_msg, char* invoke_type) {
+bool set_error_msg(History* history, char* command, char* error_msg, char* invoke_type) {
     char convert_to_number[512];
     char* trim_zeros = malloc(sizeof(char) * 512);
     strcpy(trim_zeros, "");
@@ -142,9 +140,12 @@ bool set_error_msg(char* command, char* error_msg, char* invoke_type) {
             strcpy(error_msg, "Positive invocation failed: out of range\n");
         else
             strcpy(error_msg, "Negative invocation failed: out of range\n");
+        
+        if(history->entries[0].entry_num == 0)
+            strcpy(error_msg, "History is empty\n");
     }
     if(!strcmp(convert_to_number, "0\n")) {
-        strcpy(error_msg, "Please enter a number bigger than zero\n");
+        strcpy(error_msg, "Please enter a number other than zero\n");
     }
 
     free(trim_zeros);

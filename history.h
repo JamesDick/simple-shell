@@ -66,7 +66,7 @@ void add_entry(History* history, char* command, char* alias_cmd);
  */
 char* get_entry(History* history, char* command);
 
-bool set_error_msg(char* command, char* error_msg, char* invoke_type);
+bool set_error_msg(History* history, char* command, char* error_msg, char* invoke_type);
 
 bool has_letter(char* input, char* invoke_type, char* trim_zeros);
 
