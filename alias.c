@@ -211,7 +211,7 @@ void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_
 
         if(strcmp(command_before, command)) {
             if(current->used == true) {
-                if(quiet == true)
+                if(quiet == false)
                     printf("Cycle found and resolved!\n");
 
                 strcpy(user_input, "");
