@@ -35,7 +35,7 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* command, c
  * @param alias_cmd The alias and its arguments to be stored
  * @param quiet Bool value which determines whether certain messages are to be printed
  */
-void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd, bool quiet);
+void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd);
 
 void print_aliases(Alias_List list);
 

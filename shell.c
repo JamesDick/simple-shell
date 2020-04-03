@@ -14,13 +14,13 @@ int main() {
         strcpy(alias_cmd, "");
 
         split_str(args, user_input, " \n\t|><&;");
-        insert_aliases(alias_list, args, user_input, alias_cmd, false);
+        insert_aliases(alias_list, args, user_input, alias_cmd);
         free(args[0]);
 
         invoke_history(history, user_input);
 
         split_str(args, user_input, " \n\t|><&;");
-        insert_aliases(alias_list, args, user_input, alias_cmd, true);
+        insert_aliases(alias_list, args, user_input, alias_cmd);
         invoke_history(history, user_input);
         add_entry(history, user_input, alias_cmd);
         free(args[0]);

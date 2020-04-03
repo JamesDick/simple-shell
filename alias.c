@@ -193,7 +193,7 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* command, c
  * @param user_input The user input to be modified
  * @param alias_cmd The alias and its arguments to be stored
  */
-void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd, bool quiet) {
+void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd) {
     /* If the list if empty, there's nothing to alias.
      * If this is an unalias command, it would never work if we applied the alias */
     if(is_empty(list) || args[0] == NULL || !strncmp(args[0], "alias", 5) || !strncmp(args[0], "unalias", 7))
@@ -211,9 +211,8 @@ void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_
 
         if(strcmp(command_before, command)) {
             if(current->used == true) {
-                if(quiet == false)
-                    printf("Cycle found and resolved!\n");
-
+                printf("Cycle found and resolved!\n");
+                
                 strcpy(user_input, "");
                 strcpy(alias_cmd, "");
                 break;
