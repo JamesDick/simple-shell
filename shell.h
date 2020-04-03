@@ -21,7 +21,7 @@ void exec_cmd(char** args, bool stop);
 void get_new_path(char* user_input);
 void set_dir(char* user_input);
 void set_new_path(char* new_path);
-void replacetilde(char** path);
+void replacetilde(char* path);
 void changedir_cmd(char** args);
 void getpath_cmd(char** args);
 void setpath_cmd(char** args);

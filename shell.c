@@ -366,7 +366,7 @@ void set_dir(char* user_input) {
     strcpy(final_path_ptr, user_input);
 
     if(final_path_ptr[0] == '~') {
-        replacetilde(&final_path_ptr);
+        replacetilde(final_path_ptr);
     }
 
     if(chdir(final_path_ptr) == -1) {
@@ -398,6 +398,7 @@ char* get_last_word(char* user_input) {
     int words_length = split_str(path_split, user_input, "/");
 
     strcpy(word_ptr, path_split[words_length - 1]);
+    free(path_split[0]);
     return word_ptr;
 }
 
@@ -406,10 +407,10 @@ char* get_last_word(char* user_input) {
 *
 * @param path String containing the user entered directory
 */
-void replacetilde(char** path) {
+void replacetilde(char* path) {
     char* ready_path_ptr = malloc(sizeof(char) * BUFFER_SIZE);
     char* path_split[ARG_LIMIT];
-    split_str(path_split, *path, "/");
+    split_str(path_split, path, "/");
 
     strcpy(ready_path_ptr, getenv("HOME"));
     strcat(ready_path_ptr, "/");
@@ -421,6 +422,7 @@ void replacetilde(char** path) {
         strcat(ready_path_ptr, "/");
     }
 
-    strcpy(*path, ready_path_ptr);
+    strcpy(path, ready_path_ptr);
+    free(path_split[0]);
     free(ready_path_ptr);
 }
