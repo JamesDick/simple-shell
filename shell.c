@@ -1,5 +1,17 @@
 #include "shell.h"
 
+/**
+* Simple Shell, developed by
+* ------------------
+* Jamie McKitting
+* Mary Amanda Iferi-Norman
+* James Dick
+* Cameron MacReady
+* Yohanes Zhelezov
+* ------------------
+* Group 28
+*/
+
 int main() {
     char* user_input = malloc(sizeof(char) * BUFFER_SIZE);
     char* alias_cmd = malloc(sizeof(char) * BUFFER_SIZE);
