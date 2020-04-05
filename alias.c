@@ -182,6 +182,11 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* command, c
     /* Add a new line at the end so that history is printed properly */
     strcat(buffer, "\n");
     strcat(alias_cmd, "\n");
+
+    /* If the alias, aliases an invocation do not add alias name in history */
+    if(alias->replacement[0] == '!') {
+        strcpy(alias_cmd, "");
+    }
     return buffer;
 }
 
@@ -240,7 +245,7 @@ void reset_aliases(Alias_List list) {
     Alias* current = *list;
 
     while(current) {
-        current->used = 0;
+        current->used = false;
         current = current->next;
     }
 }

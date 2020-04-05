@@ -33,7 +33,6 @@ char* insert_alias(Alias* alias, char** args, char* user_input, char* command, c
  * @param args The command and its arguments split into words
  * @param user_input The raw line read from the user
  * @param alias_cmd The alias and its arguments to be stored
- * @param quiet Bool value which determines whether certain messages are to be printed
  */
 void insert_aliases(Alias_List list, char** args, char* user_input, char* alias_cmd);
 
