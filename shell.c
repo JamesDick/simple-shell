@@ -127,7 +127,7 @@ void invoke_history(History* history, char* user_input) {
         char* error_msg = get_entry(history, user_input);
 
         if(!strcmp(user_input, "")) {
-            printf(error_msg);
+            printf("%s", error_msg);
         }
 
         free(error_msg);
@@ -355,10 +355,7 @@ void get_new_path(char* user_input) {
 */
 void set_new_path(char* new_path) {
     if(new_path != NULL) {
-        if(setenv("PATH", new_path, 1) == 0) {
-            printf("New PATH: %s\n", getenv("PATH"));
-        }
-        else {
+        if(setenv("PATH", new_path, 1) != 0) {
             perror("Error");
         }
     }
