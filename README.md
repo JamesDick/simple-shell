@@ -34,7 +34,7 @@ The shell supports the following commands:<br><br>
             execute the command with number 2, or !-1 will execute again the last
             command). <br><br>
   
-`alias` – print all set aliases (alias plus aliased command)<br><br>
+`alias` – Print all set aliases (alias plus aliased command). <br><br>
 
 `alias <name> <command>` -  Alias name to be the command. Note that the command may 
                             also include any number of parameters. <br><br>
