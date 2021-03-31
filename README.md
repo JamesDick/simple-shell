@@ -2,7 +2,7 @@
 Simple OS shell for a Unix-type system, made in C as part of an assignment at the University of Strathclyde.
 
 ## Usage
-You can get a compiled version of the shell from the releases section, or if you'd like to compile it yourself, you can run:
+You can get a compiled version of the shell from the [releases](https://github.com/JamesDick/simple-shell/releases/tag/v1.0) section, or if you'd like to compile it yourself, you can run:
 ```bash
 gcc -o simple-shell shell.c alias.c history.c
 ```
